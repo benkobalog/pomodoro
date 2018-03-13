@@ -2,7 +2,6 @@ package repository
 
 import slick.jdbc.JdbcBackend
 import slick.jdbc.JdbcBackend.Database
-import slick.driver.PostgresDriver
 
 object PostgresConnection {
 

@@ -8,14 +8,17 @@ lazy val root = (project in file("."))
 
 scalaVersion := "2.12.3"
 
+val slickVersion = "3.2.2"
+
 libraryDependencies += guice
-libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
-libraryDependencies += "org.postgresql" % "postgresql" % "42.2.1"
 libraryDependencies ++= Seq(
-  "com.typesafe.slick" %% "slick-codegen" % "3.2.2",
-  "com.typesafe.slick" %% "slick" % "3.2.2",
-  "com.typesafe.slick" %% "slick-hikaricp" % "3.2.2",
-  "org.slf4j" % "slf4j-nop" % "1.6.4"
+  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test,
+  "org.postgresql" % "postgresql" % "42.2.1",
+  "com.typesafe.slick" %% "slick-codegen" % slickVersion,
+  "com.typesafe.slick" %% "slick" % slickVersion,
+  "com.typesafe.slick" %% "slick-hikaricp" % slickVersion,
+  "org.slf4j" % "slf4j-nop" % "1.6.4",
+  "com.adrianhurt" %% "play-bootstrap" % "1.2-P26-B4"
 )
 
 flywayUrl := "jdbc:postgresql://localhost:5432/pomodoro"
@@ -23,7 +26,6 @@ flywayUser := "postgres"
 // TODO Nasty workaround for not being able to set env vars for intellij sbt..
 flywayPassword := sys.env.getOrElse("POMODORO_PASS", "")
 flywayLocations += "db/migration"
-
 
 lazy val schemaGenArgs = {
   val slickDriver = "slick.jdbc.PostgresProfile"

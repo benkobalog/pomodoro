@@ -18,7 +18,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick" % slickVersion,
   "com.typesafe.slick" %% "slick-hikaricp" % slickVersion,
   "org.slf4j" % "slf4j-nop" % "1.6.4",
-  "com.adrianhurt" %% "play-bootstrap" % "1.2-P26-B4"
+  "com.adrianhurt" %% "play-bootstrap" % "1.2-P26-B4",
+  "org.webjars" % "bootswatch-superhero" % "3.3.5+4"
 )
 
 flywayUrl := "jdbc:postgresql://localhost:5432/pomodoro"

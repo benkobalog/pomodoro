@@ -1,23 +1,29 @@
 @(loginForm: Form[UserForm.User])(implicit request: RequestHeader, msgProv: MessagesProvider)
 
 @main("Pomodoro") {
-   <div class="row">
+    <div class="row">
      <div class="col">
        <div class="card">
          <h2>
-           <div class="card-body text-center" id="timer">
-             25:00
+           <div class="card-body text-center" id="pomodoro-timer">
+               25:00
            </div>
          </h2>
        </div>
      </div>
-   </div>
-   <div class="row">
+    </div>
+    <div class="row">
      <div class="col">
-       <button type="button" class="btn btn-outline-success btn-lg btn-block">Start</button>
+       <button type="button"
+               class="btn btn-outline-success btn-lg btn-block"
+               onclick="startTimer()"
+               id="start-button">Start</button>
      </div>
      <div class="col">
-       <button type="button" class="btn btn-outline-danger btn-lg btn-block">Stop</button>
+       <button type="button"
+               class="btn btn-outline-danger btn-lg btn-block"
+               onclick="stopTimer()"
+               id="stop-button">Stop</button>
      </div>
-   </div>
+    </div>
 }

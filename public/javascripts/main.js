@@ -1,18 +1,22 @@
+let timer;
+
 function createTimer(elementName, pomodoroLength) {
     let secondsElapsed = 0;
     const interval = setInterval(() => {
-        showTimer(pomodoroLength - secondsElapsed, elementName);
+        drawTimer(pomodoroLength - secondsElapsed, elementName);
         if (secondsElapsed >= pomodoroLength) {
             clearInterval(interval);
         }
         secondsElapsed += 1;
     }, 1000);
+    timer = interval;
+    return interval;
 }
 
-function showTimer(remainingSeconds, elementName) {
+function drawTimer(remainingSeconds, elementName) {
     const {minutes, seconds} = secondsToTime(remainingSeconds);
     const timerStr = `${minutes}:${seconds}`;
-    document.getElementById(elementName).innerHTML = timerStr;
+    $("#" + elementName).html(timerStr);
     document.title = timerStr;
 }
 
@@ -31,4 +35,28 @@ function secondsToTime(seconds) {
     };
 }
 
-createTimer("timer", 25 * 60)
+function resetTimer(elementName, seconds) {
+    console.debug("Resetting timer");
+    drawTimer(seconds, elementName);
+    if (timer != null) {
+        clearInterval(timer);
+    }
+}
+
+function startTimer() {
+    createTimer('pomodoro-timer', 25*60);
+    $("#stop-button" ).prop("disabled", false);    
+    $("#start-button").prop("disabled", true);    
+}
+
+function stopTimer() {
+    resetTimer("pomodoro-timer", 25*60);
+    $("#stop-button" ).prop("disabled", true);
+    $("#start-button").prop("disabled", false);    
+}
+
+window.onload = () => {
+    resetTimer("pomodoro-timer", 25*60);
+    $("#stop-button").prop("disabled", true);
+    console.debug("asd")
+}

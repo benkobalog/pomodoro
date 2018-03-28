@@ -1,13 +1,27 @@
 @(loginForm: Form[UserForm.User])(implicit request: RequestHeader, msgProv: MessagesProvider)
 
-@implicitFC = @{ b4.horizontal.fieldConstructor("col-md-4", "col-md-8") }
+<!--@implicitFC = @{ b4.horizontal.fieldConstructor("col-md-4", "col-md-8") }-->
 
 @main("Pomodoro") {
-  @b4.form(routes.HomeController.index) {
-    @b4.email( loginForm("email"), '_label -> "Email", 'placeholder -> "example@mail.com" )
-    @b4.password( loginForm("password"), '_label -> "Password", 'placeholder -> "Password" )
-    @b4.submit('class -> "btn btn-default"){ Sign in }
-  }
-
-  <p>retekfozelek</p>
+ <div class="container">
+   <div class="row">
+     <div class="col-sm-4 offset-4">
+       <div class="card">
+         <h2>
+           <div class="card-body text-center" id="timer">
+             25:00
+           </div>
+         </h2>
+       </div>
+     </div>
+   </div>
+   <div class="row">
+     <div class="col-sm-2 offset-4">
+       <button type="button" class="btn btn-success btn-block">Start</button>
+     </div>
+     <div class="col-sm-2">
+       <button type="button" class="btn btn-danger btn-block">Stop</button>
+     </div>
+   </div>
+ </div>
 }

@@ -23,9 +23,4 @@ class HomeController @Inject()(cc: ControllerComponents)
   def index() = Action { implicit request: Request[AnyContent] =>
     Ok(views.html.index(UserForm.form))
   }
-
-  def test() = Action { implicit request: Request[AnyContent] =>
-    Ok(views.html.simpleexample1("asd"))
-  }
-
 }

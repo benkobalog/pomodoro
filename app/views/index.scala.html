@@ -3,9 +3,9 @@
 <!--@implicitFC = @{ b4.horizontal.fieldConstructor("col-md-4", "col-md-8") }-->
 
 @main("Pomodoro") {
- <div class="container">
+ <div class="container-fluid">
    <div class="row">
-     <div class="col-sm-4 offset-4">
+     <div class="col">
        <div class="card">
          <h2>
            <div class="card-body text-center" id="timer">
@@ -16,11 +16,11 @@
      </div>
    </div>
    <div class="row">
-     <div class="col-sm-2 offset-4">
-       <button type="button" class="btn btn-success btn-block">Start</button>
+     <div class="col">
+       <button type="button" class="btn btn-outline-success btn-lg btn-block">Start</button>
      </div>
-     <div class="col-sm-2">
-       <button type="button" class="btn btn-danger btn-block">Stop</button>
+     <div class="col">
+       <button type="button" class="btn btn-outline-danger btn-lg btn-block">Stop</button>
      </div>
    </div>
  </div>

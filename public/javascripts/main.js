@@ -1,4 +1,5 @@
 let timer;
+let sound;
 
 function createTimer(elementName, pomodoroLength) {
     let secondsElapsed = 0;
@@ -6,10 +7,10 @@ function createTimer(elementName, pomodoroLength) {
         drawTimer(pomodoroLength - secondsElapsed, elementName);
         if (secondsElapsed >= pomodoroLength) {
             clearInterval(interval);
+            playSound();
         }
         secondsElapsed += 1;
     }, 1000);
-    timer = interval;
     return interval;
 }
 
@@ -44,19 +45,25 @@ function resetTimer(elementName, seconds) {
 }
 
 function startTimer() {
-    createTimer('pomodoro-timer', 25*60);
+    timer = createTimer('pomodoro-timer', 25 * 60);
     $("#stop-button" ).prop("disabled", false);    
     $("#start-button").prop("disabled", true);    
 }
 
 function stopTimer() {
     resetTimer("pomodoro-timer", 25*60);
+    sound.pause();
     $("#stop-button" ).prop("disabled", true);
     $("#start-button").prop("disabled", false);    
 }
 
 window.onload = () => {
     resetTimer("pomodoro-timer", 25*60);
+    sound = new Audio("assets/sounds/tool.mp3");
     $("#stop-button").prop("disabled", true);
     console.debug("asd")
+}
+
+function playSound() {
+    sound.play();
 }

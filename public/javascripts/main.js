@@ -47,14 +47,14 @@ function resetTimer(elementName, seconds) {
 function startTimer() {
     timer = createTimer('pomodoro-timer', 25 * 60);
     $("#stop-button" ).prop("disabled", false);    
-    $("#start-button").prop("disabled", true);    
+    $("#start-button").prop("disabled", true);
 }
 
 function stopTimer() {
     resetTimer("pomodoro-timer", 25*60);
     sound.pause();
     $("#stop-button" ).prop("disabled", true);
-    $("#start-button").prop("disabled", false);    
+    $("#start-button").prop("disabled", false);
 }
 
 window.onload = () => {

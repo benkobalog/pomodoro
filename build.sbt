@@ -9,6 +9,7 @@ lazy val root = (project in file("."))
 scalaVersion := "2.12.3"
 
 val slickVersion = "3.2.2"
+val circeVersion = "0.9.1"
 
 libraryDependencies += guice
 libraryDependencies ++= Seq(
@@ -19,7 +20,10 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick-hikaricp" % slickVersion,
   "org.slf4j" % "slf4j-nop" % "1.6.4",
   "com.adrianhurt" %% "play-bootstrap" % "1.2-P26-B4",
-  "org.webjars" % "bootswatch-superhero" % "3.3.5+4"
+  "org.webjars" % "bootswatch-superhero" % "3.3.5+4",
+  "io.circe" %% "circe-core" % circeVersion,
+  "io.circe" %% "circe-generic" % circeVersion,
+  "io.circe" %% "circe-parser" % circeVersion
 )
 
 flywayUrl := "jdbc:postgresql://localhost:5432/pomodoro"

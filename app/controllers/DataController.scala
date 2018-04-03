@@ -1,11 +1,15 @@
 package controllers
 
+import java.sql.Timestamp
 import java.util.UUID
 
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import repository.PostgresConnection.db
+import io.circe._
+import io.circe.generic.auto._
+import io.circe.syntax._
 
 import concurrent.ExecutionContext.Implicits.global
 
@@ -14,10 +18,35 @@ class DataController @Inject()(cc: ControllerComponents)
     extends AbstractController(cc)
     with I18nSupport {
 
-  def pomodoro() = Action.async { implicit request: Request[AnyContent] =>
-    val repo = new repository.postgres.PomodoroPqslRepo
+  private val repo = new repository.postgres.PomodoroPqslRepo
+
+  private val uuid: UUID =
+    UUID.fromString("7c0325b7-7ead-4c24-abfe-5a7b4e0fc60f")
+
+  def pomodoroStart() = Action.async { implicit request: Request[AnyContent] =>
     repo
-      .startPomodoro(UUID.fromString("117aafab-2ad9-4bc8-ba28-d931d8a6f4a1"))
+      .startPomodoro(uuid)
       .map(updated => Ok(updated.toString))
   }
+
+  def pomodoroFinish() = Action.async { implicit request: Request[AnyContent] =>
+    repo
+      .finishPomodoro(uuid)
+      .map(updated => Ok(updated.toString))
+  }
+
+  implicit val timeStampEncoder = new Encoder[java.sql.Timestamp] {
+    override def apply(t: Timestamp): Json = Json.fromString(t.toString)
+  }
+
+  implicit val javaDurationEncoder = new Encoder[java.time.Duration] {
+    override def apply(t: java.time.Duration): Json = Json.fromString(t.toString)
+  }
+
+  def pomodoroGet() = Action.async { implicit request: Request[AnyContent] =>
+    repo
+      .get(uuid)
+      .map(x => Ok(x.asJson.toString()).as(JSON))
+  }
+
 }

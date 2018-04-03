@@ -3,6 +3,7 @@ package postgres
 
 import java.util.UUID
 
+import model.Pomodoro
 import slick.jdbc.JdbcBackend.DatabaseDef
 import slick.jdbc.PostgresProfile.api._
 
@@ -30,6 +31,19 @@ class PomodoroPqslRepo(implicit db: DatabaseDef, ec: ExecutionContext)
         .map(_.finished)
         .update(Some(timeStamp))
     } yield nrUpdated)
+  }
+
+  def get(usersId: UUID) = {
+    db.run(
+      pomodoroTable
+        .filter(_.usersId === usersId)
+        .filter(_.finished.nonEmpty)
+        .sortBy(_.finished)
+        .take(5)
+        .map(row => (row.started, row.finished.get))
+        .result
+        .map(_.map(x => Pomodoro.fromInterval(x._1, x._2)))
+    )
   }
 
 }

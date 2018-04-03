@@ -1,6 +1,7 @@
 package controllers
 
 import java.sql.Timestamp
+import java.time.Duration
 import java.util.UUID
 
 import javax.inject.{Inject, Singleton}
@@ -35,13 +36,16 @@ class DataController @Inject()(cc: ControllerComponents)
       .map(updated => Ok(updated.toString))
   }
 
-  implicit val timeStampEncoder = new Encoder[java.sql.Timestamp] {
-    override def apply(t: Timestamp): Json = Json.fromString(t.toString)
-  }
+  implicit val timeStampEncoder: Encoder[java.sql.Timestamp] =
+    new Encoder[java.sql.Timestamp] {
+      override def apply(t: Timestamp): Json = Json.fromString(t.toString)
+    }
 
-  implicit val javaDurationEncoder = new Encoder[java.time.Duration] {
-    override def apply(t: java.time.Duration): Json = Json.fromString(t.toString)
-  }
+  implicit val javaDurationEncoder: Encoder[Duration] =
+    new Encoder[Duration] {
+      override def apply(t: Duration): Json =
+        Json.fromString(t.toString)
+    }
 
   def pomodoroGet() = Action.async { implicit request: Request[AnyContent] =>
     repo

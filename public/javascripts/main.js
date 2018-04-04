@@ -1,6 +1,21 @@
 let timer;
 let sound;
 
+
+function updateLastPomodoros() {
+    $.get("/pomodoro", function(data, status){
+        const tableRow = (duration, started, finished) => { 
+            return `<tr>` +
+                `<td>${duration}</td>` +
+                `<td>${started}</td>` +
+                `<td>${finished}</td>` +
+                `</tr>`
+        }
+        const tableContent = data.map(x => tableRow(x.duration, x.started, x.finished)).join("");
+        $("#lastPomodorosTable").html(tableContent);
+    });
+}
+
 function createTimer(elementName, pomodoroLength) {
     let secondsElapsed = 0;
     const interval = setInterval(() => {
@@ -54,7 +69,7 @@ window.onload = () => {
     resetTimer("pomodoro-timer", 25*60);
     sound = new Audio("assets/sounds/tool.mp3");
     $("#stop-button").prop("disabled", true);
-    console.debug("asd")
+    updateLastPomodoros();
 }
 
 function playSound() {

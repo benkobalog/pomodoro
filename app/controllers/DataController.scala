@@ -38,6 +38,6 @@ class DataController @Inject()(cc: ControllerComponents)
   def pomodoroGet() = Action.async { implicit request: Request[AnyContent] =>
     pomodoroRepo
       .get(uuid)
-      .map(x => Ok(x.asJson))
+      .map(pomodoros => Ok(pomodoros.asJson))
   }
 }

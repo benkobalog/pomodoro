@@ -38,7 +38,7 @@ class PomodoroPqslRepo(implicit db: DatabaseDef, ec: ExecutionContext)
       pomodoroTable
         .filter(_.usersId === usersId)
         .filter(_.finished.nonEmpty)
-        .sortBy(_.finished)
+        .sortBy(_.finished.desc)
         .take(5)
         .map(row => (row.started, row.finished.get))
         .result

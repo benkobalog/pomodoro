@@ -1,17 +1,16 @@
 let timer;
 let sound;
 
-
 function updateLastPomodoros() {
     $.get("/pomodoro", function(data, status){
-        const tableRow = (duration, started, finished) => { 
+        const tableRow = (pomodoroData) => { 
             return `<tr>` +
-                `<td>${duration}</td>` +
-                `<td>${started}</td>` +
-                `<td>${finished}</td>` +
+                `<td>${pomodoroData.duration}</td>` +
+                `<td>${pomodoroData.started}</td>` +
+                `<td>${pomodoroData.finished}</td>` +
                 `</tr>`
         }
-        const tableContent = data.map(x => tableRow(x.duration, x.started, x.finished)).join("");
+        const tableContent = data.map(tableRow).join("");
         $("#lastPomodorosTable").html(tableContent);
     });
 }

@@ -21,18 +21,11 @@ function drawTimer(remainingSeconds, elementName) {
     document.title = timerStr;
 }
 
-String.prototype.lpad = function(padString, length) {
-    var str = this;
-    while (str.length < length)
-        str = padString + str;
-    return str;
-}
-
 function secondsToTime(seconds) {
     const minutes = Math.floor(seconds / 60);
     return {
-        minutes: minutes.toString().lpad("0", 2),
-        seconds: (seconds - minutes * 60).toString().lpad("0", 2)
+        minutes: minutes.toString().padStart(2, "0"),
+        seconds: (seconds - minutes * 60).toString().padStart(2, "0")
     };
 }
 

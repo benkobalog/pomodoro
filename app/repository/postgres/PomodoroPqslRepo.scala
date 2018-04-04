@@ -14,12 +14,12 @@ class PomodoroPqslRepo(implicit db: DatabaseDef, ec: ExecutionContext)
 
   private val pomodoroTable = TableQuery[dao.Tables.Pomodoro]
 
-  def startPomodoro(usersId: UUID) = {
+  def start(usersId: UUID) = {
     val insertQ = pomodoroTable.map(_.usersId) += Some(usersId)
     db.run(insertQ)
   }
 
-  def finishPomodoro(usersId: UUID) = {
+  def finish(usersId: UUID) = {
     val current_timestamp =
       SimpleLiteral[java.sql.Timestamp]("CURRENT_TIMESTAMP")
 

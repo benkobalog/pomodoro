@@ -40,4 +40,10 @@ class DataController @Inject()(cc: ControllerComponents)
       .get(uuid)
       .map(pomodoros => Ok(pomodoros.asJson))
   }
+
+  def pomodoroState() = Action.async { implicit request: Request[AnyContent] =>
+    pomodoroRepo
+      .getState(uuid)
+      .map(state => Ok(state.asJson))
+  }
 }

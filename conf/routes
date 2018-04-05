@@ -10,6 +10,7 @@ POST    /                controllers.HomeController.userForm
 POST   /pomodoro         controllers.DataController.pomodoroStart
 PATCH  /pomodoro         controllers.DataController.pomodoroFinish
 GET    /pomodoro         controllers.DataController.pomodoroGet
+GET    /pomodoro/state   controllers.DataController.pomodoroState
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

@@ -3,7 +3,7 @@ package postgres
 
 import java.util.UUID
 
-import model.Pomodoro
+import model.{Pomodoro, PomodoroState, Running, Idle}
 import slick.jdbc.JdbcBackend.DatabaseDef
 import slick.jdbc.PostgresProfile.api._
 
@@ -19,10 +19,10 @@ class PomodoroPqslRepo(implicit db: DatabaseDef, ec: ExecutionContext)
     db.run(insertQ)
   }
 
-  def finish(usersId: UUID) = {
-    val current_timestamp =
-      SimpleLiteral[java.sql.Timestamp]("CURRENT_TIMESTAMP")
+  private val current_timestamp =
+    SimpleLiteral[java.sql.Timestamp]("CURRENT_TIMESTAMP")
 
+  def finish(usersId: UUID) = {
     db.run(for {
       timeStamp <- current_timestamp.result
       nrUpdated <- pomodoroTable
@@ -46,4 +46,23 @@ class PomodoroPqslRepo(implicit db: DatabaseDef, ec: ExecutionContext)
     )
   }
 
+  def getState(usersId: UUID): Future[PomodoroState] = {
+    db.run(
+      for {
+        ts <- current_timestamp.result
+        result <- pomodoroTable
+          .filter(_.usersId === usersId)
+          .filter(_.finished.isEmpty)
+          .map(r => (r.started, ts))
+          .take(2) // don't get more than 2 in any case, because we don't need more
+          .result
+          .map {
+            case Nil => Idle
+            case (started, current) +: Nil =>
+              Running((current.getTime - started.getTime) / 1000)
+            case _ +: _ => throw new Exception("Multiple pomodoros?")
+          }
+      } yield result
+    )
+  }
 }

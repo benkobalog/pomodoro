@@ -1,9 +1,16 @@
 let timer;
 let sound;
+let pomodoroState;
+
+const States = Object.freeze({
+    "Idle": {},
+    "Pomodoro": {},
+    "Break": {}
+});
 
 function updateLastPomodoros() {
     $.get("/pomodoro", function(data, status){
-        const tableRow = (pomodoroData) => { 
+        const tableRow = (pomodoroData) => {
             return `<tr>` +
                 `<td>${pomodoroData.duration}</td>` +
                 `<td>${pomodoroData.started}</td>` +
@@ -13,6 +20,21 @@ function updateLastPomodoros() {
         const tableContent = data.map(tableRow).join("");
         $("#lastPomodorosTable").html(tableContent);
     });
+}
+
+function savePomodoroStart() {
+    $.post("/pomodoro", (data) => {
+        console.info("Result of pomodoro create: " + data);
+    });
+}
+
+function savePomodoroFinish() {
+    let xhr = new XMLHttpRequest();
+    xhr.open('PATCH', "/pomodoro");
+    xhr.onload = function() {
+        console.info("Result of pomodoro finish: " + xhr.status + " response: " + xhr.responseText);
+    };
+    xhr.send();
 }
 
 function createTimer(elementName, pomodoroLength) {
@@ -53,6 +75,7 @@ function resetTimer(elementName, seconds) {
 
 function startTimer() {
     timer = createTimer('pomodoro-timer', 25 * 60);
+    savePomodoroStart();
     $("#stop-button" ).prop("disabled", false);    
     $("#start-button").prop("disabled", true);
 }
@@ -60,6 +83,7 @@ function startTimer() {
 function stopTimer() {
     resetTimer("pomodoro-timer", 25*60);
     sound.pause();
+    savePomodoroFinish();
     $("#stop-button" ).prop("disabled", true);
     $("#start-button").prop("disabled", false);
 }

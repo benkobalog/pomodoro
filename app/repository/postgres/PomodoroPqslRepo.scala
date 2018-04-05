@@ -54,7 +54,7 @@ class PomodoroPqslRepo(implicit db: DatabaseDef, ec: ExecutionContext)
           .filter(_.usersId === usersId)
           .filter(_.finished.isEmpty)
           .map(r => (r.started, ts))
-          .take(2) // don't get more than 2 in any case, because we don't need more
+          .take(2) // Normally there should only be one active pomodoro, we take 2 to detect errors
           .result
           .map {
             case Nil => Idle

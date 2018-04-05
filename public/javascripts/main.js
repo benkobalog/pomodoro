@@ -76,12 +76,14 @@ function resetTimer(elementName, seconds) {
 }
 
 function startTimer() {
+    pomodoroState = States.Running;
     timer = createTimer('pomodoro-timer', pLength);
     savePomodoroStart();
     setButtons();
 }
 
 function stopTimer() {
+    pomodoroState = States.Idle;
     resetTimer("pomodoro-timer", pLength);
     sound.pause();
     savePomodoroFinish();
@@ -116,7 +118,6 @@ function loadStateFromBackend() {
 window.onload = () => {
     loadStateFromBackend();
     sound = new Audio("assets/sounds/tool.mp3");
-    $("#stop-button").prop("disabled", true);
     updateLastPomodoros();
 }
 

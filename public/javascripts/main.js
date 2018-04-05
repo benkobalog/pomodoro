@@ -1,11 +1,12 @@
 let timer;
 let sound;
 let pomodoroState;
+const pLength = 25 * 60;
 
 const States = Object.freeze({
-    "Idle": {},
-    "Pomodoro": {},
-    "Break": {}
+    "Idle": "Idle",
+    "Running": "Running",
+    "Break": "Break"
 });
 
 function updateLastPomodoros() {
@@ -44,6 +45,7 @@ function createTimer(elementName, pomodoroLength) {
         if (secondsElapsed >= pomodoroLength) {
             clearInterval(interval);
             playSound();
+            stopTimer();
         }
         secondsElapsed += 1;
     }, 1000);
@@ -74,22 +76,45 @@ function resetTimer(elementName, seconds) {
 }
 
 function startTimer() {
-    timer = createTimer('pomodoro-timer', 25 * 60);
+    timer = createTimer('pomodoro-timer', pLength);
     savePomodoroStart();
-    $("#stop-button" ).prop("disabled", false);    
-    $("#start-button").prop("disabled", true);
+    setButtons();
 }
 
 function stopTimer() {
-    resetTimer("pomodoro-timer", 25*60);
+    resetTimer("pomodoro-timer", pLength);
     sound.pause();
     savePomodoroFinish();
-    $("#stop-button" ).prop("disabled", true);
-    $("#start-button").prop("disabled", false);
+    setButtons();
+}
+
+function setButtons() {
+    console.info("Setting buttons: " + JSON.stringify(pomodoroState));
+    if(pomodoroState == States.Idle) {
+        $("#stop-button" ).prop("disabled", true);
+        $("#start-button").prop("disabled", false);
+    } else if(pomodoroState == States.Running) {
+        $("#stop-button" ).prop("disabled", false);    
+        $("#start-button").prop("disabled", true);
+    }
+}
+
+function loadStateFromBackend() {
+    $.get("/pomodoro/state", (data, status) => {
+        if(data.Idle) {
+            pomodoroState = States.Idle;
+            resetTimer("pomodoro-timer", pLength);
+        } else if (typeof(data.Running) == 'object') {
+            pomodoroState = States.Running;
+            resetTimer("pomodoro-timer", pLength - data.Running.secondsElapsed);
+            timer = createTimer("pomodoro-timer", pLength - data.Running.secondsElapsed);
+        }
+        setButtons();
+    });
 }
 
 window.onload = () => {
-    resetTimer("pomodoro-timer", 25*60);
+    loadStateFromBackend();
     sound = new Audio("assets/sounds/tool.mp3");
     $("#stop-button").prop("disabled", true);
     updateLastPomodoros();

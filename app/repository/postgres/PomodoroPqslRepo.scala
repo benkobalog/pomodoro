@@ -9,8 +9,7 @@ import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class PomodoroPqslRepo(implicit db: DatabaseDef, ec: ExecutionContext)
-    extends PomodoroRepo {
+class PomodoroPqslRepo(implicit db: DatabaseDef, ec: ExecutionContext) {
 
   private val pomodoroTable = TableQuery[dao.Tables.Pomodoro]
 

@@ -1,10 +1,23 @@
 package repository.postgres
-import org.scalatest._
+import java.sql.Timestamp
+import java.util.{Calendar, UUID}
 
-class UserPsqlRepoSpec extends FlatSpec with Matchers {
-  import repository.PostgresConnection.db
-  import scala.concurrent.ExecutionContext.Implicits.global
-  "UserPsqlRepo" should "find a user based on email" in {
-    new UserPsqlRepo()
+import org.scalatest._
+import repository.dao.Tables.UsersRow
+import repository.PostgresConnection.db
+
+class UserPsqlRepoSpec extends AsyncFlatSpec with Matchers {
+
+  "UserPsqlRepo" should "insert delete user" in {
+    val repo = new UserPsqlRepo()
+    val timestamp = new Timestamp(Calendar.getInstance().getTime.getTime)
+    val email = "test@user.com"
+    val user = UsersRow(UUID.randomUUID(), email, timestamp)
+
+    for {
+      _ <- repo.insertUser(user)
+      retrievedUser <- repo.findByEmail(email)
+      delete <- repo.deleteById(retrievedUser.get.id)
+    } yield assert(delete == 1 && retrievedUser.get == user)
   }
 }

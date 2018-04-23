@@ -17,8 +17,12 @@ class UserPsqlRepo(implicit db: DatabaseDef, ec: ExecutionContext) {
     db.run(userByEmail.result.headOption)
   }
 
-  def insertUser(user: UsersRow): Future[Int] = {
+  def insert(user: UsersRow): Future[Int] = {
     db.run(tableQuery += user)
+  }
+
+  def insertFromEmail(email: String): Future[Int] = {
+    db.run(tableQuery.map(_.email) += email)
   }
 
   def deleteById(uuid: UUID): Future[Int] = {

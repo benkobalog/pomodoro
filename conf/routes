@@ -3,14 +3,15 @@
 # https://www.playframework.com/documentation/latest/ScalaRouting
 # ~~~~
 
-# An example controller showing a sample home page
+# WebPage endpoints
 GET     /                controllers.HomeController.index
 POST    /                controllers.HomeController.userForm
 
-POST   /pomodoro         controllers.DataController.pomodoroStart
-PATCH  /pomodoro         controllers.DataController.pomodoroFinish
-GET    /pomodoro         controllers.DataController.pomodoroGet
-GET    /pomodoro/state   controllers.DataController.pomodoroState
+# Pomodoro RPC style endpoints
+POST   /pomodoroStart     controllers.DataController.pomodoroStart
+PATCH  /pomodoroFinish    controllers.DataController.pomodoroFinish
+GET    /pomodoro          controllers.DataController.pomodoroGet
+GET    /pomodoroState     controllers.DataController.pomodoroState
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

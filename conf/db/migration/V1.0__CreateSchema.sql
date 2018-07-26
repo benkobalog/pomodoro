@@ -12,12 +12,3 @@ CREATE TABLE pomodoro (
  finished TIMESTAMP,
  users_id uuid REFERENCES users(id)
 );
-
--- Create test data
-INSERT INTO users (email)
-VALUES ('test1@test.com'), ('test2@test.com');
-
-INSERT INTO pomodoro (started, finished, users_id)
-values
- (current_timestamp - (25 * interval '1 minute'), current_timestamp, (select id from users where email = 'test1@test.com')),
- (current_timestamp - (25 * interval '1 minute'), current_timestamp, (select id from users where email = 'test2@test.com'));

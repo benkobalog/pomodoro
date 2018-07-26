@@ -24,14 +24,14 @@ function updateLastPomodoros() {
 }
 
 function savePomodoroStart() {
-    $.post("/pomodoro", (data) => {
+    $.post("/pomodoroStart", (data) => {
         console.info("Result of pomodoro create: " + data);
     });
 }
 
 function savePomodoroFinish() {
     let xhr = new XMLHttpRequest();
-    xhr.open('PATCH', "/pomodoro");
+    xhr.open('PATCH', "/pomodoroFinish");
     xhr.onload = function() {
         console.info("Result of pomodoro finish: " + xhr.status + " response: " + xhr.responseText);
     };
@@ -102,7 +102,7 @@ function setButtons() {
 }
 
 function loadStateFromBackend() {
-    $.get("/pomodoro/state", (data, status) => {
+    $.get("/pomodoroState", (data, status) => {
         if(data.Idle) {
             pomodoroState = States.Idle;
             resetTimer("pomodoro-timer", pLength);

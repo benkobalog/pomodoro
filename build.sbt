@@ -13,6 +13,8 @@ val circeVersion = "0.9.1"
 
 libraryDependencies += guice
 libraryDependencies ++= Seq(
+  "org.mindrot" % "jbcrypt" % "0.3m",
+  "com.h2database" % "h2" % "1.4.192",
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test,
   "org.postgresql" % "postgresql" % "42.2.1",
   "com.typesafe.slick" %% "slick-codegen" % slickVersion,
@@ -23,7 +25,8 @@ libraryDependencies ++= Seq(
   "org.webjars" % "bootswatch-superhero" % "3.3.5+4",
   "io.circe" %% "circe-core" % circeVersion,
   "io.circe" %% "circe-generic" % circeVersion,
-  "io.circe" %% "circe-parser" % circeVersion
+  "io.circe" %% "circe-parser" % circeVersion,
+  "com.softwaremill.sttp" %% "core" % "1.1.13"
 )
 
 flywayUrl := "jdbc:postgresql://localhost:5432/pomodoro"

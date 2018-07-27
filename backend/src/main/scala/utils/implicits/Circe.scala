@@ -1,15 +1,12 @@
 package utils.implicits
 
-import java.sql.Timestamp
 import java.time.Duration
 
 import io.circe.{Encoder, Json}
 
 object Circe {
 
-  def createEncoder[A](fn: A => Json): Encoder[A] = new Encoder[A] {
-    override def apply(a: A): Json = fn(a)
-  }
+  def createEncoder[A](fn: A => Json): Encoder[A] = (a: A) => fn(a)
 
   implicit val timeStampEncoder: Encoder[java.sql.Timestamp] =
     createEncoder(

@@ -10,7 +10,7 @@ export PGPASSWORD=$pw
 
 $psql_command 'create user postgres createdb'
 $psql_command 'create database pomodoro;'
-$psql_command '\i conf/db/migration/V1.0__CreateSchema.sql' -d $db
+$psql_command '\i frontend/conf/db/migration/V1.0__CreateSchema.sql' -d $db
 
 
 # psql -h localhost -p 5432  -d postgres -U postgres --password

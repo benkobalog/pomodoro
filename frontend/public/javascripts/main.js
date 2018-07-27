@@ -9,8 +9,10 @@ const States = Object.freeze({
     "Break": "Break"
 });
 
+const backendAddress = "http://localhost:9001";
+
 function updateLastPomodoros() {
-    $.get("/pomodoro", function(data, status){
+    $.get(backendAddress + "/pomodoro", function(data, status){
         const tableRow = (pomodoroData) => {
             return `<tr>` +
                 `<td>${pomodoroData.duration}</td>` +
@@ -31,7 +33,7 @@ function savePomodoroStart() {
 
 function savePomodoroFinish() {
     let xhr = new XMLHttpRequest();
-    xhr.open('PATCH', "/pomodoroFinish");
+    xhr.open('PATCH', backendAddress + "/pomodoroFinish");
     xhr.onload = function() {
         console.info("Result of pomodoro finish: " + xhr.status + " response: " + xhr.responseText);
     };
@@ -102,7 +104,7 @@ function setButtons() {
 }
 
 function loadStateFromBackend() {
-    $.get("/pomodoroState", (data, status) => {
+    $.get(backendAddress + "/pomodoroState", (data, status) => {
         if(data.Idle) {
             pomodoroState = States.Idle;
             resetTimer("pomodoro-timer", pLength);

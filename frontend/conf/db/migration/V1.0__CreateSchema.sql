@@ -12,3 +12,7 @@ CREATE TABLE pomodoro (
  finished TIMESTAMP,
  users_id uuid REFERENCES users(id)
 );
+
+
+INSERT INTO users (id, email)
+VALUES ('7c0325b7-7ead-4c24-abfe-5a7b4e0fc60f', 'dev@mail.com')

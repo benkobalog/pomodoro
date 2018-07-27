@@ -12,32 +12,33 @@ const States = Object.freeze({
 const backendAddress = "http://localhost:9001";
 
 function updateLastPomodoros() {
-    $.get(backendAddress + "/pomodoro", function(data, status){
-        const tableRow = (pomodoroData) => {
-            return `<tr>` +
-                `<td>${pomodoroData.duration}</td>` +
-                `<td>${pomodoroData.started}</td>` +
-                `<td>${pomodoroData.finished}</td>` +
-                `</tr>`
-        }
-        const tableContent = data.map(tableRow).join("");
-        $("#lastPomodorosTable").html(tableContent);
+
+    const options = { method: "GET", mode: "cors" };
+    fetch(backendAddress + "/pomodoro", options)
+        .then( (response) => {
+            console.log(data);
+            const tableRow = (pomodoroData) => {
+                return `<tr>` +
+                    `<td>${pomodoroData.duration}</td>` +
+                    `<td>${pomodoroData.started}</td>` +
+                    `<td>${pomodoroData.finished}</td>` +
+                    `</tr>`
+            }
+            const tableContent = response.json().map(tableRow).join("");
+            $("#lastPomodorosTable").html(tableContent);
     });
 }
 
 function savePomodoroStart() {
-    $.post("/pomodoroStart", (data) => {
-        console.info("Result of pomodoro create: " + data);
-    });
+    const options = { method: "POST", mode: "cors" };
+    fetch(backendAddress + "/pomodoroStart", options)
+        .then(response => console.info("Result of pomodoro start: " + response));
 }
 
 function savePomodoroFinish() {
-    let xhr = new XMLHttpRequest();
-    xhr.open('PATCH', backendAddress + "/pomodoroFinish");
-    xhr.onload = function() {
-        console.info("Result of pomodoro finish: " + xhr.status + " response: " + xhr.responseText);
-    };
-    xhr.send();
+    const options = { method: "PATCH", mode: "cors" };
+    fetch(backendAddress + "/pomodoroFinish", options)
+        .then(response => console.info("Result of pomodoro finish: " + response));
 }
 
 function createTimer(elementName, pomodoroLength) {

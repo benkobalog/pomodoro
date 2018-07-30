@@ -7,12 +7,12 @@ import repository.postgres.PomodoroPqslRepo
 import scala.concurrent.ExecutionContextExecutor
 import scala.io.StdIn
 
+import endpoints.{CORSHandler, Authentication, PomodoroEndpoints}
+
 object Server {
-  private def userPassAuthenticator(credentials: Credentials): Option[String] =
-    credentials match {
-      case p @ Credentials.Provided(id) if p.verify("1234") => Some(id)
-      case _                                                => None
-    }
+  implicit class PipeOps[A](val a: A) extends AnyVal {
+    def |>[B](fn: A => B): B = fn(a)
+  }
 
   def main(args: Array[String]): Unit = {
     implicit val system: ActorSystem = ActorSystem("webserver-system")
@@ -22,19 +22,21 @@ object Server {
     import repository.PostgresConnection.db
     implicit val pomodoroRepo: PomodoroPqslRepo = new PomodoroPqslRepo
 
-    val route = new endpoints.PomodoroEndpoints().route
-
-    val routeWithCors = endpoints.CORSHandler.corsHandler(route)
+    val routeWithCorsAndAuth =
+      new PomodoroEndpoints().route |>
+        Authentication.routeWithAuthenitcation |>
+        CORSHandler.corsHandler
 
     val port = 9001
 
     val bindingFuture =
-      Http().bindAndHandle(routeWithCors, "localhost", 9001)
+      Http().bindAndHandle(routeWithCorsAndAuth, "localhost", 9001)
 
-    println(s"Server online at http://localhost:$port/\nPress RETURN to stop...")
-    StdIn.readLine() // let it run until user presses return
+    println(
+      s"Server online at http://localhost:$port/\nPress RETURN to stop...")
+    StdIn.readLine()
     bindingFuture
-      .flatMap(_.unbind()) // trigger unbinding from the port
-      .onComplete(_ => system.terminate()) // and shutdown when done
+      .flatMap(_.unbind())
+      .onComplete(_ => system.terminate())
   }
 }

@@ -111,8 +111,13 @@ function loadStateFromBackend() {
     });
 }
 
+const username = "Bela";
+const password = "1234";
+const authHeader = { Authorization : 'Basic ' + btoa(username + ":" + password) };
+
 function httpGet(path, fn) {
-    const options = { method: "GET" };
+    const options = { method: "GET", headers: authHeader };
+    console.log(options);
     return fetch(backendAddress + path, options)
         .then(r => r.json())
         .then(data => fn(data))
@@ -120,14 +125,14 @@ function httpGet(path, fn) {
 }
 
 function httpPost(path, fn) {
-    const options = { method: "POST", mode: "cors" };
+    const options = { method: "POST", mode: "cors", headers: authHeader };
     return fetch(backendAddress + path, options)
         .then(response => fn(response))
         .catch(err => console.log(err));
 }
 
 function httpPatch(path, fn) {
-    const options = { method: "PATCH", mode: "cors" };
+    const options = { method: "PATCH", mode: "cors", headers: authHeader };
     return fetch(backendAddress + path, options)
         .then(response => fn(response))
         .catch(err => console.log(err));

@@ -12,11 +12,7 @@ const States = Object.freeze({
 const backendAddress = "http://localhost:9001";
 
 function updateLastPomodoros() {
-    const options = { method: "GET", mode: "cors" };
-    fetch(backendAddress + "/pomodoro", options)
-        .then(r => r.json())
-        .then( data => {
-            console.log(data);
+    httpGet("/pomodoro", data => {
             const tableRow = (pomodoroData) => {
                 return `<tr>` +
                     `<td>${pomodoroData.duration}</td>` +
@@ -31,15 +27,11 @@ function updateLastPomodoros() {
 }
 
 function savePomodoroStart() {
-    const options = { method: "POST", mode: "cors" };
-    fetch(backendAddress + "/pomodoroStart", options)
-        .then(response => console.info("Result of pomodoro start: " + response));
+    httpPost("/pomodoroStart", response => console.info("Result of pomodoro start: " + response));
 }
 
 function savePomodoroFinish() {
-    const options = { method: "PATCH", mode: "cors" };
-    fetch(backendAddress + "/pomodoroFinish", options)
-        .then(response => console.info("Result of pomodoro finish: " + response));
+    httpPatch("/pomodoroFinish", response => console.info("Result of pomodoro finish: " + response));
 }
 
 function createTimer(elementName, pomodoroLength) {
@@ -106,7 +98,7 @@ function setButtons() {
 }
 
 function loadStateFromBackend() {
-    $.get(backendAddress + "/pomodoroState", (data, status) => {
+    httpGet("/pomodoroState", data => {
         if(data.Idle) {
             pomodoroState = States.Idle;
             resetTimer("pomodoro-timer", pLength);
@@ -117,6 +109,28 @@ function loadStateFromBackend() {
         }
         setButtons();
     });
+}
+
+function httpGet(path, fn) {
+    const options = { method: "GET" };
+    return fetch(backendAddress + path, options)
+        .then(r => r.json())
+        .then(data => fn(data))
+        .catch(err => console.log(err));
+}
+
+function httpPost(path, fn) {
+    const options = { method: "POST", mode: "cors" };
+    return fetch(backendAddress + path, options)
+        .then(response => fn(response))
+        .catch(err => console.log(err));
+}
+
+function httpPatch(path, fn) {
+    const options = { method: "PATCH", mode: "cors" };
+    return fetch(backendAddress + path, options)
+        .then(response => fn(response))
+        .catch(err => console.log(err));
 }
 
 window.onload = () => {

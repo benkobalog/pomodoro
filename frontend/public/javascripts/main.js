@@ -12,19 +12,20 @@ const States = Object.freeze({
 const backendAddress = "http://localhost:9001";
 
 function updateLastPomodoros() {
-
     const options = { method: "GET", mode: "cors" };
     fetch(backendAddress + "/pomodoro", options)
-        .then( (response) => {
+        .then(r => r.json())
+        .then( data => {
             console.log(data);
             const tableRow = (pomodoroData) => {
                 return `<tr>` +
                     `<td>${pomodoroData.duration}</td>` +
                     `<td>${pomodoroData.started}</td>` +
                     `<td>${pomodoroData.finished}</td>` +
-                    `</tr>`
+                    `</tr>`;
             }
-            const tableContent = response.json().map(tableRow).join("");
+
+            const tableContent = data.map(tableRow).join("");
             $("#lastPomodorosTable").html(tableContent);
     });
 }

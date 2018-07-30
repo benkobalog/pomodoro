@@ -1,19 +1,19 @@
 package endpoints
 
-
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Directive0, Route}
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.model.HttpMethods._
 
-object CORSHandler{
+object CORSHandler {
 
   private val corsResponseHeaders = List(
     `Access-Control-Allow-Origin`.*,
     `Access-Control-Allow-Credentials`(true),
     `Access-Control-Allow-Headers`("Authorization",
-      "Content-Type", "X-Requested-With")
+                                   "Content-Type",
+                                   "X-Requested-With")
   )
 
   //this directive adds access control headers to normal responses
@@ -22,8 +22,9 @@ object CORSHandler{
 
   //this handles preflight OPTIONS requests.
   private def preflightRequestHandler: Route = options {
-    complete(HttpResponse(StatusCodes.OK).
-      withHeaders(`Access-Control-Allow-Methods`(OPTIONS, POST, PATCH, GET, DELETE)))
+    complete(
+      HttpResponse(StatusCodes.OK).withHeaders(
+        `Access-Control-Allow-Methods`(OPTIONS, POST, PATCH, GET, DELETE)))
   }
 
   // Wrap the Route with this method to enable adding of CORS headers
@@ -33,6 +34,6 @@ object CORSHandler{
 
   // Helper method to add CORS headers to HttpResponse
   // preventing duplication of CORS headers across code
-  def addCORSHeaders(response: HttpResponse):HttpResponse =
+  def addCORSHeaders(response: HttpResponse): HttpResponse =
     response.withHeaders(corsResponseHeaders)
 }

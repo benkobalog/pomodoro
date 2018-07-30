@@ -13,9 +13,15 @@ object Circe {
       timestamp => Json.fromString(timestamp.toString.takeWhile(_ != '.')))
 
   implicit val javaDurationEncoder: Encoder[Duration] =
-    createEncoder { duration =>
-      val string =
-        duration.toString.replaceAll("(H|M|S)", "$1 ").toLowerCase.trim
-      Json.fromString(string)
-    }
+    createEncoder { durationFormatter _ andThen Json.fromString }
+
+  def durationFormatter(duration: Duration): String = {
+    val allSeconds = duration.getSeconds
+    val hours = allSeconds / 3600
+    val minutes = (allSeconds - hours * 3600) / 60
+    val seconds = allSeconds - hours * 3600 - minutes * 60
+    List((hours, "h"), (minutes, "m"), (seconds, "s"))
+      .collect { case (amount, unit) if amount != 0 => amount + unit }
+      .reduce(_ + " " + _)
+  }
 }

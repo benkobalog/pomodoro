@@ -13,5 +13,5 @@ object Pomodoro {
     Pomodoro(started,
              finished,
              java.time.Duration
-               .between(finished.toLocalDateTime, started.toLocalDateTime))
+               .between(started.toLocalDateTime, finished.toLocalDateTime))
 }

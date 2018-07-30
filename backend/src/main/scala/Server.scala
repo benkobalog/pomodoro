@@ -24,10 +24,12 @@ object Server {
 
     val route = new endpoints.PomodoroEndpoints().route
 
+    val routeWithCors = endpoints.CORSHandler.corsHandler(route)
+
     val port = 9001
 
     val bindingFuture =
-      Http().bindAndHandle(route, "localhost", 9001)
+      Http().bindAndHandle(routeWithCors, "localhost", 9001)
 
     println(s"Server online at http://localhost:$port/\nPress RETURN to stop...")
     StdIn.readLine() // let it run until user presses return

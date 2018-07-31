@@ -16,34 +16,29 @@ import scala.util.{Failure, Success, Try}
 
 class PomodoroEndpoints(implicit pomodoroRepo: PomodoroPqslRepo) {
 
-  private val uuid: UUID =
-    UUID.fromString("7c0325b7-7ead-4c24-abfe-5a7b4e0fc60f")
-
-  val route: Route =
-    Route.seal {
-      path("pomodoroStart") {
-        post {
-          onComplete(pomodoroRepo.start(uuid))(respond(_ =>
-            "Pomodoro successfully started"))
+  def route(uuid: UUID): Route =
+    path("pomodoroStart") {
+      post {
+        onComplete(pomodoroRepo.start(uuid))(respond(_ =>
+          "Pomodoro successfully started"))
+      }
+    } ~
+      path("pomodoroFinish") {
+        patch {
+          onComplete(pomodoroRepo.finish(uuid))(respond(_ =>
+            "Pomodoro successfully closed"))
         }
       } ~
-        path("pomodoroFinish") {
-          patch {
-            onComplete(pomodoroRepo.finish(uuid))(respond(_ =>
-              "Pomodoro successfully closed"))
-          }
-        } ~
-        path("pomodoro") {
-          get {
-            onComplete(pomodoroRepo.get(uuid))(respond(_.asJson))
-          }
-        } ~
-        path("pomodoroState") {
-          get {
-            onComplete(pomodoroRepo.getState(uuid))(respond(_.asJson))
-          }
+      path("pomodoro") {
+        get {
+          onComplete(pomodoroRepo.get(uuid))(respond(_.asJson))
         }
-    }
+      } ~
+      path("pomodoroState") {
+        get {
+          onComplete(pomodoroRepo.getState(uuid))(respond(_.asJson))
+        }
+      }
 
   private def respond[A](fn: A => ToResponseMarshallable)(
       body: Try[A]): StandardRoute = body match {

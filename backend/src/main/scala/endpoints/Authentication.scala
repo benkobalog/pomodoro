@@ -1,10 +1,14 @@
 package endpoints
 
-import akka.http.scaladsl.server.Directives.authenticateBasic
+import java.util.UUID
+
+import scala.concurrent.{ExecutionContext, Future}
+import akka.http.scaladsl.server.Directives.authenticateBasicAsync
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.Credentials
+import repository.postgres.UserPsqlRepo
 
-object Authentication {
+class Authentication(implicit userRepo: UserPsqlRepo, ec: ExecutionContext) {
 
   private def userPassAuthenticator(credentials: Credentials): Option[String] = {
     credentials match {
@@ -13,11 +17,19 @@ object Authentication {
     }
   }
 
+  private def asyncAuthenticator(credentials: Credentials): Future[Option[String]] = {
+    credentials match {
+      case p@Credentials.Provided(id) if p.verify("1234") =>
+        userRepo.findByEmail(id).map(_.map(_.id.toString))
 
-  def routeWithAuthenitcation(route: Route): Route = {
-    authenticateBasic(realm = "pomodoro", userPassAuthenticator) {
-      userName =>
-        route
+      case _ => Future.successful(None)
+    }
+  }
+
+  def routeWithAuthentication(route: UUID => Route): Route = {
+    authenticateBasicAsync(realm = "pomodoro", asyncAuthenticator) {
+      userId =>
+        route(UUID.fromString(userId))
     }
   }
 

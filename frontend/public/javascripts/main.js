@@ -23,6 +23,7 @@ function updateLastPomodoros() {
 
             const tableContent = data.map(tableRow).join("");
             $("#lastPomodorosTable").html(tableContent);
+            console.log("Updated pomodoros");
     });
 }
 
@@ -84,6 +85,7 @@ function stopTimer() {
     sound.pause();
     savePomodoroFinish();
     setButtons();
+    updateLastPomodoros();
 }
 
 function setButtons() {
@@ -111,7 +113,7 @@ function loadStateFromBackend() {
     });
 }
 
-const username = "Bela";
+const username = "dev2@mail.com";
 const password = "1234";
 const authHeader = { Authorization : 'Basic ' + btoa(username + ":" + password) };
 
@@ -119,9 +121,9 @@ function httpGet(path, fn) {
     const options = { method: "GET", headers: authHeader };
     console.log(options);
     return fetch(backendAddress + path, options)
+        .catch(err => console.log(err))
         .then(r => r.json())
-        .then(data => fn(data))
-        .catch(err => console.log(err));
+        .then(data => fn(data));
 }
 
 function httpPost(path, fn) {

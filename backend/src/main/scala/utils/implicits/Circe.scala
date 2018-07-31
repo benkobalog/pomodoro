@@ -22,6 +22,6 @@ object Circe {
     val seconds = allSeconds - hours * 3600 - minutes * 60
     List((hours, "h"), (minutes, "m"), (seconds, "s"))
       .collect { case (amount, unit) if amount != 0 => amount + unit }
-      .reduce(_ + " " + _)
+      .reduceOption(_ + " " + _).getOrElse("0s")
   }
 }

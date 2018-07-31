@@ -2,12 +2,11 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.directives.Credentials
 import akka.stream.ActorMaterializer
-import repository.postgres.PomodoroPqslRepo
+import repository.postgres.{PomodoroPqslRepo, UserPsqlRepo}
 
 import scala.concurrent.ExecutionContextExecutor
 import scala.io.StdIn
-
-import endpoints.{CORSHandler, Authentication, PomodoroEndpoints}
+import endpoints.{Authentication, CORSHandler, PomodoroEndpoints}
 
 object Server {
   implicit class PipeOps[A](val a: A) extends AnyVal {
@@ -21,11 +20,10 @@ object Server {
 
     import repository.PostgresConnection.db
     implicit val pomodoroRepo: PomodoroPqslRepo = new PomodoroPqslRepo
+    implicit val userRepo: UserPsqlRepo = new UserPsqlRepo
 
-    val routeWithCorsAndAuth =
-      new PomodoroEndpoints().route |>
-        Authentication.routeWithAuthenitcation |>
-        CORSHandler.corsHandler
+    val routeWithCorsAndAuth = CORSHandler.corsHandler(
+      new Authentication().routeWithAuthentication(new PomodoroEndpoints().route))
 
     val port = 9001
 

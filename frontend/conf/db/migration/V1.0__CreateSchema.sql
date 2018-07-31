@@ -14,5 +14,5 @@ CREATE TABLE pomodoro (
 );
 
 
-INSERT INTO users (id, email)
-VALUES ('7c0325b7-7ead-4c24-abfe-5a7b4e0fc60f', 'dev@mail.com')
+INSERT INTO users (email)
+VALUES ('dev@mail.com'), ('dev2@mail.com');

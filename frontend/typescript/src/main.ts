@@ -12,7 +12,7 @@ enum States {
 const backendAddress = "http://localhost:9001";
 
 function updateLastPomodoros() {
-    httpGet("/pomodoro", data => {
+    return httpGet("/pomodoro", data => {
             const tableRow = (pomodoroData: any) => {
                 return `<tr>` +
                     `<td>${pomodoroData.duration}</td>` +
@@ -28,11 +28,11 @@ function updateLastPomodoros() {
 }
 
 function savePomodoroStart() {
-    httpPost("/pomodoroStart", response => console.info("Result of pomodoro start: " + response));
+    return httpPost("/pomodoroStart", response => console.info("Result of pomodoro start: " + response));
 }
 
 function savePomodoroFinish() {
-    httpPatch("/pomodoroFinish", response => console.info("Result of pomodoro finish: " + response));
+    return httpPatch("/pomodoroFinish", response => console.info("Result of pomodoro finish: " + response));
 }
 
 function createTimer(elementName: string, pomodoroLength: number) {
@@ -72,8 +72,6 @@ function resetTimer(elementName:string, seconds: number) {
     }
 }
 
-
-
 function startTimer() {
     pomodoroState = States.Running;
     timer = createTimer('pomodoro-timer', pLength);
@@ -85,9 +83,9 @@ function stopTimer() {
     pomodoroState = States.Idle;
     resetTimer("pomodoro-timer", pLength);
     sound.pause();
-    savePomodoroFinish();
+    savePomodoroFinish()
+    .then(_ => updateLastPomodoros());
     setButtons();
-    updateLastPomodoros();
 }
 
 function setButtons() {
@@ -102,7 +100,7 @@ function setButtons() {
 }
 
 function loadStateFromBackend() {
-    httpGet("/pomodoroState", (data: any) => {
+    return httpGet("/pomodoroState", (data: any) => {
         if(data.Idle) {
             pomodoroState = States.Idle;
             resetTimer("pomodoro-timer", pLength);
@@ -115,7 +113,7 @@ function loadStateFromBackend() {
     });
 }
 
-const username = "dev2@mail.com";
+const username = "dev@mail.com";
 const password = "1234";
 const authHeader = { Authorization : 'Basic ' + btoa(username + ":" + password) };
 

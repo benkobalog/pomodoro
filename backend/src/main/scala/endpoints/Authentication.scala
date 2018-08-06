@@ -10,13 +10,6 @@ import repository.postgres.UserPsqlRepo
 
 class Authentication(implicit userRepo: UserPsqlRepo, ec: ExecutionContext) {
 
-  private def userPassAuthenticator(credentials: Credentials): Option[String] = {
-    credentials match {
-      case p@Credentials.Provided(id) if p.verify("1234") => Some(id)
-      case _ => None
-    }
-  }
-
   private def asyncAuthenticator(credentials: Credentials): Future[Option[String]] = {
     credentials match {
       case p@Credentials.Provided(id) if p.verify("1234") =>

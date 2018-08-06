@@ -1,4 +1,5 @@
 import akka.actor.ActorSystem
+import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.directives.Credentials
 import akka.stream.ActorMaterializer
@@ -7,6 +8,8 @@ import repository.postgres.{PomodoroPqslRepo, UserPsqlRepo}
 import scala.concurrent.ExecutionContextExecutor
 import scala.io.StdIn
 import endpoints.{Authentication, CORSHandler, PomodoroEndpoints}
+import akka.http.scaladsl.server.directives.DebuggingDirectives
+
 
 object Server {
   implicit class PipeOps[A](val a: A) extends AnyVal {
@@ -28,7 +31,7 @@ object Server {
     val port = 9001
 
     val bindingFuture =
-      Http().bindAndHandle(routeWithCorsAndAuth, "localhost", 9001)
+      Http().bindAndHandle(DebuggingDirectives.logResult("stuff", Logging.InfoLevel)(routeWithCorsAndAuth), "localhost", 9001)
 
     println(
       s"Server online at http://localhost:$port/\nPress RETURN to stop...")

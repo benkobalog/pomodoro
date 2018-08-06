@@ -1,19 +1,19 @@
-let timer;
-let sound;
-let pomodoroState;
+let timer: number;
+let sound: HTMLAudioElement;
+let pomodoroState:States;
 const pLength = 25 * 60;
 
-const States = Object.freeze({
-    "Idle": "Idle",
-    "Running": "Running",
-    "Break": "Break"
-});
+enum States {
+    Idle, 
+    Running,
+    Break
+}
 
 const backendAddress = "http://localhost:9001";
 
 function updateLastPomodoros() {
     httpGet("/pomodoro", data => {
-            const tableRow = (pomodoroData) => {
+            const tableRow = (pomodoroData: any) => {
                 return `<tr>` +
                     `<td>${pomodoroData.duration}</td>` +
                     `<td>${pomodoroData.started}</td>` +
@@ -35,9 +35,9 @@ function savePomodoroFinish() {
     httpPatch("/pomodoroFinish", response => console.info("Result of pomodoro finish: " + response));
 }
 
-function createTimer(elementName, pomodoroLength) {
+function createTimer(elementName: string, pomodoroLength: number) {
     let secondsElapsed = 0;
-    const interval = setInterval(() => {
+    const interval = window.setInterval(() => {
         drawTimer(pomodoroLength - secondsElapsed, elementName);
         if (secondsElapsed >= pomodoroLength) {
             clearInterval(interval);
@@ -49,14 +49,14 @@ function createTimer(elementName, pomodoroLength) {
     return interval;
 }
 
-function drawTimer(remainingSeconds, elementName) {
+function drawTimer(remainingSeconds: number, elementName: string) {
     const {minutes, seconds} = secondsToTime(remainingSeconds);
     const timerStr = `${minutes}:${seconds}`;
     $("#" + elementName).html(timerStr);
     document.title = timerStr;
 }
 
-function secondsToTime(seconds) {
+function secondsToTime(seconds: number) {
     const minutes = Math.floor(seconds / 60);
     return {
         minutes: minutes.toString().padStart(2, "0"),
@@ -64,13 +64,15 @@ function secondsToTime(seconds) {
     };
 }
 
-function resetTimer(elementName, seconds) {
+function resetTimer(elementName:string, seconds: number) {
     console.debug("Resetting timer");
     drawTimer(seconds, elementName);
     if (timer != null) {
         clearInterval(timer);
     }
 }
+
+
 
 function startTimer() {
     pomodoroState = States.Running;
@@ -94,13 +96,13 @@ function setButtons() {
         $("#stop-button" ).prop("disabled", true);
         $("#start-button").prop("disabled", false);
     } else if(pomodoroState == States.Running) {
-        $("#stop-button" ).prop("disabled", false);    
+        $("#stop-button" ).prop("disabled", false);
         $("#start-button").prop("disabled", true);
     }
 }
 
 function loadStateFromBackend() {
-    httpGet("/pomodoroState", data => {
+    httpGet("/pomodoroState", (data: any) => {
         if(data.Idle) {
             pomodoroState = States.Idle;
             resetTimer("pomodoro-timer", pLength);
@@ -117,26 +119,26 @@ const username = "dev2@mail.com";
 const password = "1234";
 const authHeader = { Authorization : 'Basic ' + btoa(username + ":" + password) };
 
-function httpGet(path, fn) {
-    const options = { method: "GET", headers: authHeader };
+function httpGet(path: string, fn: (a: any) => void) {
+    const options: RequestInit = { method: "GET", headers: authHeader };
     console.log(options);
     return fetch(backendAddress + path, options)
-        .catch(err => console.log(err))
-        .then(r => r.json())
-        .then(data => fn(data));
-}
-
-function httpPost(path, fn) {
-    const options = { method: "POST", mode: "cors", headers: authHeader };
-    return fetch(backendAddress + path, options)
-        .then(response => fn(response))
+        .then(r => r.json() )
+        .then(data => fn(data))
         .catch(err => console.log(err));
 }
 
-function httpPatch(path, fn) {
-    const options = { method: "PATCH", mode: "cors", headers: authHeader };
+function httpPost(path: string, fn: (r: Response) => void) {
+    const options: RequestInit = { method: "POST", mode: "cors", headers: authHeader };
     return fetch(backendAddress + path, options)
-        .then(response => fn(response))
+        .then(fn)
+        .catch(err => console.log(err));
+}
+
+function httpPatch(path: string, fn: (r: Response) => void) {
+    const options: RequestInit = { method: "PATCH", mode: "cors", headers: authHeader };
+    return fetch(backendAddress + path, options)
+        .then(fn)
         .catch(err => console.log(err));
 }
 
@@ -144,6 +146,8 @@ window.onload = () => {
     loadStateFromBackend();
     sound = new Audio("assets/sounds/tool.mp3");
     updateLastPomodoros();
+    document.getElementById("start-button").onclick = startTimer;
+    document.getElementById("stop-button").onclick = stopTimer;
 }
 
 function playSound() {

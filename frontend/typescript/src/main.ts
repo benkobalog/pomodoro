@@ -1,3 +1,5 @@
+import {HttpClient} from "./HttpClient";
+
 let timer: number;
 let sound: HTMLAudioElement;
 let pomodoroState:States;
@@ -10,9 +12,14 @@ enum States {
 }
 
 const backendAddress = "http://localhost:9001";
+const username = "dev@mail.com";
+const password = "1234";
+const authHeader = { Authorization : 'Basic ' + btoa(username + ":" + password) };
+
+const client = new HttpClient(backendAddress, authHeader);
 
 function updateLastPomodoros() {
-    return httpGet("/pomodoro", data => {
+    return client.httpGet("/pomodoro", data => {
             const tableRow = (pomodoroData: any) => {
                 return `<tr>` +
                     `<td>${pomodoroData.duration}</td>` +
@@ -28,11 +35,11 @@ function updateLastPomodoros() {
 }
 
 function savePomodoroStart() {
-    return httpPost("/pomodoroStart", response => console.info("Result of pomodoro start: " + response));
+    return client.httpPost("/pomodoroStart", response => console.info("Result of pomodoro start: " + response));
 }
 
 function savePomodoroFinish() {
-    return httpPatch("/pomodoroFinish", response => console.info("Result of pomodoro finish: " + response));
+    return client.httpPatch("/pomodoroFinish", response => console.info("Result of pomodoro finish: " + response));
 }
 
 function createTimer(elementName: string, pomodoroLength: number) {
@@ -100,7 +107,7 @@ function setButtons() {
 }
 
 function loadStateFromBackend() {
-    return httpGet("/pomodoroState", (data: any) => {
+    return client.httpGet("/pomodoroState", (data: any) => {
         if(data.Idle) {
             pomodoroState = States.Idle;
             resetTimer("pomodoro-timer", pLength);
@@ -111,33 +118,6 @@ function loadStateFromBackend() {
         }
         setButtons();
     });
-}
-
-const username = "dev@mail.com";
-const password = "1234";
-const authHeader = { Authorization : 'Basic ' + btoa(username + ":" + password) };
-
-function httpGet(path: string, fn: (a: any) => void) {
-    const options: RequestInit = { method: "GET", headers: authHeader };
-    console.log(options);
-    return fetch(backendAddress + path, options)
-        .then(r => r.json() )
-        .then(data => fn(data))
-        .catch(err => console.log(err));
-}
-
-function httpPost(path: string, fn: (r: Response) => void) {
-    const options: RequestInit = { method: "POST", mode: "cors", headers: authHeader };
-    return fetch(backendAddress + path, options)
-        .then(fn)
-        .catch(err => console.log(err));
-}
-
-function httpPatch(path: string, fn: (r: Response) => void) {
-    const options: RequestInit = { method: "PATCH", mode: "cors", headers: authHeader };
-    return fetch(backendAddress + path, options)
-        .then(fn)
-        .catch(err => console.log(err));
 }
 
 window.onload = () => {

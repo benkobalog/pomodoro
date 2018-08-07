@@ -29,7 +29,7 @@ export class Pomodoro {
     }
 
     private createTimer(pomodoroLength: number) {
-        let secondsElapsed = 0;
+        let secondsElapsed = 1;
         const interval = window.setInterval(() => {
             drawTimer(pomodoroLength - secondsElapsed);
             if (secondsElapsed >= pomodoroLength) {
@@ -66,8 +66,8 @@ export class Pomodoro {
 
     startTimer() {
         this.pomodoroState = States.Running;
-        this.timer = this.createTimer(this.pomodoroLength);
-        this.savePomodoroStart();
+        this.savePomodoroStart()
+            .then(_ => this.timer = this.createTimer(this.pomodoroLength));
         setButtons(this.pomodoroState);
     }
     

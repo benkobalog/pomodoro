@@ -4,7 +4,7 @@ import {PomodoroStats} from "./logic/PomodoroStats";
 
 let sound: HTMLAudioElement;
 
-const pomodoroLength = 25 * 60;
+const pomodoroLength = 10;
 const backendAddress = "http://localhost:9001";
 const username = "dev@mail.com";
 const password = "1234";

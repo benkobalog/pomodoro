@@ -1,6 +1,6 @@
-@(loginForm: Form[UserForm.User])(implicit request: RequestHeader, msgProv: MessagesProvider)
+@(email: Option[String])
 
-@main("Pomodoro") {
+@main("Pomodoro", email) {
     <div class="row">
         <div class="col">
             <div class="card">

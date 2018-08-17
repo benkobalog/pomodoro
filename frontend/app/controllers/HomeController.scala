@@ -17,6 +17,7 @@ class HomeController @Inject()(cc: ControllerComponents,
 
   def index() = authenticatedUserAction {
     implicit request: Request[AnyContent] =>
-      Ok(views.html.index(request.session.get("email")))
+      val maybeString = request.session.get("email")
+      Ok("<!DOCTYPE html>" + views.Index.apply.render).as(HTML)
   }
 }

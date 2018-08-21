@@ -14,7 +14,7 @@ class AuthenticatedUserAction @Inject()(parser: BodyParsers.Default)(
                               block: Request[A] => Future[Result]): Future[Result] = {
     request.session.get("email") match {
       case None =>
-        Future.successful(Forbidden("No access yet"))
+        Future.successful(Redirect(routes.LoginController.showLoginForm))
 
       case Some(u) =>
         block(request)

@@ -1,17 +1,6 @@
 package model
 
-import java.sql.Timestamp
-
-case class Pomodoro(
-    started: Timestamp,
-    finished: Timestamp,
-    duration: java.time.Duration
-)
-
-object Pomodoro {
-  def fromInterval(started: Timestamp, finished: Timestamp) =
-    Pomodoro(started,
-             finished,
-             java.time.Duration
-               .between(started.toLocalDateTime, finished.toLocalDateTime))
-}
+case class Pomodoro(id: java.util.UUID,
+                    started: java.sql.Timestamp,
+                    finished: Option[java.sql.Timestamp] = None,
+                    usersId: Option[java.util.UUID] = None)

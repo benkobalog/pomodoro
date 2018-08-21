@@ -3,18 +3,17 @@ package postgres
 
 import java.util.UUID
 
-import model.{Pomodoro, PomodoroState, Running, Idle}
+import model.{PomodoroStats, PomodoroState, Running, Idle}
 import slick.jdbc.JdbcBackend.DatabaseDef
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class PomodoroPqslRepo(implicit db: DatabaseDef, ec: ExecutionContext) {
-
-  private val pomodoroTable = TableQuery[dao.Tables.Pomodoro]
+  import dao.Tables.Pomodoros
 
   def start(usersId: UUID) = {
-    val insertQ = pomodoroTable.map(_.usersId) += Some(usersId)
+    val insertQ = Pomodoros.map(_.usersId) += Some(usersId)
     db.run(insertQ)
   }
 
@@ -24,7 +23,7 @@ class PomodoroPqslRepo(implicit db: DatabaseDef, ec: ExecutionContext) {
   def finish(usersId: UUID) = {
     db.run(for {
       timeStamp <- current_timestamp.result
-      nrUpdated <- pomodoroTable
+      nrUpdated <- Pomodoros
         .filter(_.usersId === usersId)
         .filter(_.finished.isEmpty)
         .map(_.finished)
@@ -34,14 +33,14 @@ class PomodoroPqslRepo(implicit db: DatabaseDef, ec: ExecutionContext) {
 
   def get(usersId: UUID) = {
     db.run(
-      pomodoroTable
+      Pomodoros
         .filter(_.usersId === usersId)
         .filter(_.finished.nonEmpty)
         .sortBy(_.finished.desc)
         .take(5)
         .map(row => (row.started, row.finished.get))
         .result
-        .map(_.map(x => Pomodoro.fromInterval(x._1, x._2)))
+        .map(_.map(x => PomodoroStats.fromInterval(x._1, x._2)))
     )
   }
 
@@ -49,7 +48,7 @@ class PomodoroPqslRepo(implicit db: DatabaseDef, ec: ExecutionContext) {
     db.run(
       for {
         ts <- current_timestamp.result
-        result <- pomodoroTable
+        result <- Pomodoros
           .filter(_.usersId === usersId)
           .filter(_.finished.isEmpty)
           .map(r => (r.started, ts))

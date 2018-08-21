@@ -1,7 +1,6 @@
 package controllers
 
 import javax.inject._
-import play.api._
 import play.api.i18n._
 import play.api.mvc._
 
@@ -17,7 +16,6 @@ class HomeController @Inject()(cc: ControllerComponents,
 
   def index() = authenticatedUserAction {
     implicit request: Request[AnyContent] =>
-      val maybeString = request.session.get("email")
-      Ok("<!DOCTYPE html>" + views.Index.apply.render).as(HTML)
+      Ok(views.html.index(request.session.get("email")))
   }
 }

@@ -9,17 +9,17 @@ export class PomodoroStats {
 
     updateLastPomodoros() {
         return this.client.httpGet("/pomodoro", data => {
-                const tableRow = (pomodoroData: any) => {
-                    return `<tr>` +
-                        `<td>${pomodoroData.duration}</td>` +
-                        `<td>${pomodoroData.started}</td>` +
-                        `<td>${pomodoroData.finished}</td>` +
-                        `</tr>`;
-                }
+            const tableRow = (pomodoroData: any) => {
+                return `<tr>` +
+                    `<td>${pomodoroData.duration}</td>` +
+                    `<td>${pomodoroData.started}</td>` +
+                    `<td>${pomodoroData.finished}</td>` +
+                    `</tr>`;
+            }
 
-                const tableContent = data.map(tableRow).join("");
-                $("#lastPomodorosTable").html(tableContent);
-                console.log("Updated pomodoros");
+            const tableContent = data.map(tableRow).join("");
+            $("#lastPomodorosTable").html(tableContent);
+            console.log("Updated pomodoros");
         });
     }
 }

@@ -1,5 +1,6 @@
 
 libraryDependencies += guice
+libraryDependencies += ws
 libraryDependencies ++= Seq(
   "com.lihaoyi" %% "scalatags" % "0.6.7",
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test,

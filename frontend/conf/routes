@@ -5,7 +5,7 @@
 
 # WebPage endpoints
 GET     /login           controllers.LoginController.showLoginForm
-GET     /doLogin         controllers.LoginController.processLoginAttempt
+POST    /doLogin         controllers.LoginController.processLoginAttempt
 
 GET     /                controllers.HomeController.index
 

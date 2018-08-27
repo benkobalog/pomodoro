@@ -1,21 +1,16 @@
 import akka.actor.ActorSystem
 import akka.event.Logging
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.directives.Credentials
+import akka.http.scaladsl.server.directives.DebuggingDirectives
+import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
-import repository.postgres.{PomodoroPqslRepo, UserPsqlRepo}
+import endpoints._
+import repository.postgres.{PasswordRepo, PomodoroPqslRepo, UserPsqlRepo}
 
 import scala.concurrent.ExecutionContextExecutor
 import scala.io.StdIn
-import endpoints.{Authentication, CORSHandler, PomodoroEndpoints}
-import akka.http.scaladsl.server.directives.DebuggingDirectives
-
 
 object Server {
-  implicit class PipeOps[A](val a: A) extends AnyVal {
-    def |>[B](fn: A => B): B = fn(a)
-  }
-
   def main(args: Array[String]): Unit = {
     implicit val system: ActorSystem = ActorSystem("webserver-system")
     implicit val materializer: ActorMaterializer = ActorMaterializer()
@@ -24,14 +19,27 @@ object Server {
     import repository.PostgresConnection.db
     implicit val pomodoroRepo: PomodoroPqslRepo = new PomodoroPqslRepo
     implicit val userRepo: UserPsqlRepo = new UserPsqlRepo
+    implicit val pwRepo: PasswordRepo = new PasswordRepo
+    implicit val authentication: Authentication = new Authentication
+
+    val routes = (userId: java.util.UUID) => {
+      PomodoroEndpoints(userId) ~
+        AuthenticationEndpoints() ~
+        UserEndpoints(userId)
+    }
 
     val routeWithCorsAndAuth = CORSHandler.corsHandler(
-      new Authentication().routeWithAuthentication(new PomodoroEndpoints().route))
+      new RouteAuthentication()
+        .routeWithAuthentication(routes))
 
     val port = 9001
 
     val bindingFuture =
-      Http().bindAndHandle(DebuggingDirectives.logResult("stuff", Logging.InfoLevel)(routeWithCorsAndAuth), "localhost", 9001)
+      Http().bindAndHandle(
+        DebuggingDirectives.logResult("stuff", Logging.InfoLevel)(
+          routeWithCorsAndAuth),
+        "localhost",
+        port)
 
     println(
       s"Server online at http://localhost:$port/\nPress RETURN to stop...")

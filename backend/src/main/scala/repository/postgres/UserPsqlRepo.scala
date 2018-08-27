@@ -12,6 +12,11 @@ import model.User
 class UserPsqlRepo(implicit db: DatabaseDef, ec: ExecutionContext) {
   import dao.Tables.Users
 
+  def findById(userId: UUID): Future[Option[User]] = {
+    val userById = Users.filter(_.id === userId)
+    db.run(userById.result.headOption)
+  }
+
   def findByEmail(email: String): Future[Option[User]] = {
     val userByEmail = Users.filter(_.email === email)
     db.run(userByEmail.result.headOption)

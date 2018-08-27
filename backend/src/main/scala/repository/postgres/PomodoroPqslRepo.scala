@@ -31,13 +31,13 @@ class PomodoroPqslRepo(implicit db: DatabaseDef, ec: ExecutionContext) {
     } yield nrUpdated)
   }
 
-  def get(usersId: UUID) = {
+  def getStats(usersId: UUID, amount: Int = 5) = {
     db.run(
       Pomodoros
         .filter(_.usersId === usersId)
         .filter(_.finished.nonEmpty)
         .sortBy(_.finished.desc)
-        .take(5)
+        .take(amount)
         .map(row => (row.started, row.finished.get))
         .result
         .map(_.map(x => PomodoroStats.fromInterval(x._1, x._2)))

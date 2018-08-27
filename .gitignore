@@ -8,5 +8,5 @@ target
 /RUNNING_PID
 /project/target
 /project/project
-/frontend/public/javascripts
+/frontend/public/javascripts/main.js
 /frontend/typescript/dist

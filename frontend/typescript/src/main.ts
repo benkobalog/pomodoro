@@ -6,7 +6,6 @@ import {UserData} from "./logic/UserData";
 
 let sound: HTMLAudioElement;
 
-const backendAddress = "http://localhost:9001";
 
 function parseJwt<T> (token: string) {
     var base64Url = token.split('.')[1];
@@ -15,13 +14,16 @@ function parseJwt<T> (token: string) {
 };
 
 window.onload = () => {
+    const backendAddress = 
+        (<HTMLInputElement>document.getElementById("backend-address")).value;
+    console.log("teeexttt: |" + backendAddress);
     const tokenData = parseJwt<TokenData>(document.cookie.split('=')[1]);
     const authHeader = { Authorization : 'Basic ' + btoa(tokenData.email + ":" + tokenData.token) };
     const client = new HttpClient(backendAddress, authHeader);
     const pStats = new PomodoroStats(client);
     const userData = new UserData(client);
     const pomodoro = new Pomodoro(client, userData, pStats);
-    
+
     pStats
         .updateLastPomodoros()
         .then(() => {

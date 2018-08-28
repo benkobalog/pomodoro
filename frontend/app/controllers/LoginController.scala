@@ -1,5 +1,6 @@
 package controllers
 
+import com.typesafe.config.Config
 import javax.inject._
 import model.User
 import play.api.data.Form
@@ -11,7 +12,7 @@ import play.api.libs.ws._
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class LoginController @Inject()(cc: ControllerComponents, ws: WSClient)(
+class LoginController @Inject()(cc: ControllerComponents, ws: WSClient, config: Config)(
     implicit ec: ExecutionContext)
     extends AbstractController(cc)
     with I18nSupport {
@@ -25,7 +26,7 @@ class LoginController @Inject()(cc: ControllerComponents, ws: WSClient)(
 
   def showLoginForm() = Action { implicit request: Request[AnyContent] =>
     Ok(
-      views.html.login(loginForm, routes.LoginController.processLoginAttempt()))
+      views.html.login(config.getString("backend.address"))(loginForm, routes.LoginController.processLoginAttempt()))
   }
 
   def processLoginAttempt() = Action.async { implicit req =>

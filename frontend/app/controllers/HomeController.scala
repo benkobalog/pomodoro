@@ -1,5 +1,6 @@
 package controllers
 
+import com.typesafe.config.Config
 import javax.inject._
 import play.api.i18n._
 import play.api.mvc._
@@ -10,12 +11,13 @@ import play.api.mvc._
   */
 @Singleton
 class HomeController @Inject()(cc: ControllerComponents,
-                               authenticatedUserAction: AuthenticatedUserAction)
+                               authenticatedUserAction: AuthenticatedUserAction,
+                               config: Config)
     extends AbstractController(cc)
     with I18nSupport {
 
   def index() = authenticatedUserAction {
     implicit request: Request[AnyContent] =>
-      Ok(views.html.index(request.session.get("email")))
+      Ok(views.html.index(config.getString("backend.address")))
   }
 }

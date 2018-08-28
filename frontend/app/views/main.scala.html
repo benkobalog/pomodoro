@@ -1,4 +1,4 @@
-@(title: String, email: Option[String])(content: Html)
+@(title: String, backendAddress: String)(content: Html)
 
 <!DOCTYPE html>
 <html lang="en">
@@ -12,7 +12,7 @@
         <link rel="stylesheet" href='@routes.Assets.versioned("stylesheets/bootstrap.min.css")'/>
     </head>
     <body>
-
+        <input type="hidden" id="backend-address" name="backend-address" value="@backendAddress">
         <div class="container" id="page-wrapper">
             <nav class="navbar navbar-dark bg-dark">
                 <a class="navbar-brand" href="#">

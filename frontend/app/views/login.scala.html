@@ -1,8 +1,8 @@
-@(loginForm: Form[model.User], postUrl: Call)(implicit request: RequestHeader, msgProv: MessagesProvider)
+@(backendAddress: String)(loginForm: Form[model.User], postUrl: Call)(implicit request: RequestHeader, msgProv: MessagesProvider)
 
 <!--@implicitFC = @{ b4.horizontal.fieldConstructor("col-md-4", "col-md-8") }-->
 
-@main("Pomodoro", None) {
+@main("Pomodoro", backendAddress) {
   @b4.form(postUrl) {
     @b4.email( loginForm("email"), '_label -> "Email", 'placeholder -> "example@mail.com" )
     @b4.password( loginForm("password"), '_label -> "Password", 'placeholder -> "Password" )

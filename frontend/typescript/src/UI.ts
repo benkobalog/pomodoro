@@ -1,4 +1,5 @@
 import {States} from "./model/States";
+import {User} from "./model/User";
 
 export function setButtons(pomodoroState: any) {
     console.info("Setting buttons: " + JSON.stringify(pomodoroState));
@@ -24,4 +25,9 @@ function secondsToTime(seconds: number) {
         minutes: minutes.toString().padStart(2, "0"),
         seconds: (seconds - minutes * 60).toString().padStart(2, "0")
     };
+}
+
+export function drawSettings(user: User) {
+    $("#pomodoro-length").val(user.pomodoroSeconds / 60);
+    $("#break-length").val(user.breakSeconds / 60);
 }

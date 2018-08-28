@@ -8,6 +8,7 @@
         <span class="input-group-text">minutes</span>
     </div>
 </div>
+
 <div class="input-group">
     <div class="input-group-prepend">
         <span class="input-group-text bg-secondary text-light">Break length</span>
@@ -17,6 +18,47 @@
         <span class="input-group-text">minutes</span>
     </div>
 </div>
+
+<div class="input-group">
+    <div class="input-group-prepend">
+        <span class="input-group-text bg-secondary text-light">Starting break</span>
+    </div>
+    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+        <label class="btn btn-light active">
+            <input type="radio" name="options" id="break-auto-option" autocomplete="off" checked>Automatically
+        </label>
+        <label class="btn btn-light">
+            <input type="radio" name="options" id="break-manual-option" autocomplete="off">Manually
+        </label>
+    </div>
+</div>
+
+<div class="input-group">
+    <div class="input-group-prepend">
+        <span class="input-group-text bg-secondary text-light">When time is up</span>
+    </div>
+
+    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+        <label class="btn btn-light active">
+            <input type="radio" name="options" id="timeup-stop-option" autocomplete="off" checked>Stop timer
+        </label>
+        <label class="btn btn-light">
+            <input type="radio" name="options" id="timeup-continue-option" autocomplete="off">Warn each
+        </label>
+    </div>
+
+    <input type="text" class="form-control" id='timeup-continue-length'>
+    <div class="input-group-prepend">
+        <span class="input-group-text">minutes</span>
+    </div>
+
+    <input type="text" class="form-control" id='timeup-continue-times'>
+    <div class="input-group-prepend">
+        <span class="input-group-text">times</span>
+    </div>
+
+</div>
+
 <div class="input-group">
     <div class="input-group-prepend">
         <button type="button" class="btn btn-secondary" id="settings-save">Save</button>

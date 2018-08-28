@@ -34,6 +34,7 @@ window.onload = () => {
                         .then(() => {
                             sound = new Audio("assets/sounds/tool.mp3");
                             bindButtonFunctions(userData, pomodoro);
+                            console.log("Initial data loaded");
                         });
             });
         })

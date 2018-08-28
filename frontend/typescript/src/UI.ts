@@ -3,12 +3,23 @@ import {User} from "./model/User";
 
 export function setButtons(pomodoroState: any) {
     console.info("Setting buttons: " + JSON.stringify(pomodoroState));
-    if(pomodoroState == States.Idle) {
-        $("#stop-button" ).prop("disabled", true);
-        $("#start-button").prop("disabled", false);
-    } else if(pomodoroState == States.Running) {
-        $("#stop-button" ).prop("disabled", false);
-        $("#start-button").prop("disabled", true);
+    switch(pomodoroState) {
+        case States.Idle: {
+            $("#stop-button" ).prop("disabled", true);
+            $("#start-button").prop("disabled", false);
+            $("#pomodoro-timer-wrapper").css("background-color", 'White');
+            break;
+        }
+        case States.Running: {
+            $("#stop-button" ).prop("disabled", false);
+            $("#start-button").prop("disabled", true);
+            $("#pomodoro-timer-wrapper").css("background-color", 'LightGrey');
+            break;
+        }
+        case States.Break: {
+            $("#pomodoro-timer-wrapper").css("background-color", 'GainsBoro');
+            break;
+        }
     }
 }
 

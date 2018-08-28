@@ -2,8 +2,8 @@ export class User {
     readonly id: string;
     readonly email: string;
     readonly createdAt: string;
-    readonly pomodoroSeconds: number;
-    readonly breakSeconds: number;
+    pomodoroSeconds: number;
+    breakSeconds: number;
 
     constructor(object: any) {
         this.id = object.id

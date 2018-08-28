@@ -23,9 +23,8 @@ window.onload = () => {
     const pStats = new PomodoroStats(client);
     const pomodoro = new Pomodoro(client, pomodoroLength, pStats);
     const userData = new UserData(client);
-    userData.updateSettings();
+    userData.loadSettings();
 
-    console.log(tokenData);
     pomodoro.loadState();
     sound = new Audio("assets/sounds/tool.mp3");
     pStats.updateLastPomodoros();
@@ -38,7 +37,7 @@ function bindButtonFunctions(userData: UserData, pomodoro: Pomodoro) {
     document.getElementById("stop-button").onclick = 
         () => pomodoro.stopTimer();
     document.getElementById("settings-save").onclick = 
-        () => userData.updateSettings();
+        () => userData.saveSettings();
 }
 
 function playSound() {

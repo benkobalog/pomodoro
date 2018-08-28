@@ -3,7 +3,6 @@ package utils.implicits
 import io.circe._
 import io.circe.parser._
 import io.circe.syntax._
-
 import akka.http.scaladsl.marshalling.{Marshaller, ToEntityMarshaller}
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.MediaTypes.`application/json`
@@ -15,7 +14,8 @@ object AkkaHttpMarshaller {
   private def jsonContentTypes: List[ContentTypeRange] =
     List(`application/json`)
 
-  implicit final def unmarshaller[A: Decoder]: FromEntityUnmarshaller[A] = {
+  implicit final def entityJsonUnmarshaller[A: Decoder]
+    : FromEntityUnmarshaller[A] = {
     Unmarshaller.stringUnmarshaller
       .forContentTypes(jsonContentTypes: _*)
       .flatMap { ctx => mat => json =>

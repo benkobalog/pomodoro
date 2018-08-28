@@ -24,7 +24,7 @@ object CORSHandler {
   private def preflightRequestHandler: Route = options {
     complete(
       HttpResponse(StatusCodes.OK).withHeaders(
-        `Access-Control-Allow-Methods`(OPTIONS, POST, PATCH, GET, DELETE)))
+        `Access-Control-Allow-Methods`(OPTIONS, POST, PATCH, GET, DELETE, PUT)))
   }
 
   // Wrap the Route with this method to enable adding of CORS headers

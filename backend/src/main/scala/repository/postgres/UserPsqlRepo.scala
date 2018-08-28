@@ -12,6 +12,11 @@ import model.User
 class UserPsqlRepo(implicit db: DatabaseDef, ec: ExecutionContext) {
   import dao.Tables.Users
 
+  def updateById(user: User): Future[Int] = {
+    val updateQuery = Users.filter(_.id === user.id).map(identity).update(user)
+    db.run(updateQuery)
+  }
+
   def findById(userId: UUID): Future[Option[User]] = {
     val userById = Users.filter(_.id === userId)
     db.run(userById.result.headOption)

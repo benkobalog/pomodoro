@@ -16,7 +16,6 @@ function parseJwt<T> (token: string) {
 window.onload = () => {
     const backendAddress = 
         (<HTMLInputElement>document.getElementById("backend-address")).value;
-    console.log("teeexttt: |" + backendAddress);
     const tokenData = parseJwt<TokenData>(document.cookie.split('=')[1]);
     const authHeader = { Authorization : 'Basic ' + btoa(tokenData.email + ":" + tokenData.token) };
     const client = new HttpClient(backendAddress, authHeader);

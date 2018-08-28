@@ -21,11 +21,21 @@ window.onload = () => {
     const pStats = new PomodoroStats(client);
     const userData = new UserData(client);
     const pomodoro = new Pomodoro(client, userData, pStats);
-
-    pomodoro.loadState();
-    sound = new Audio("assets/sounds/tool.mp3");
-    pStats.updateLastPomodoros();
-    bindButtonFunctions(userData, pomodoro);
+    
+    pStats
+        .updateLastPomodoros()
+        .then(() => {
+            userData
+                .loadSettings()
+                .then(() => {
+                    pomodoro
+                        .loadState()
+                        .then(() => {
+                            sound = new Audio("assets/sounds/tool.mp3");
+                            bindButtonFunctions(userData, pomodoro);
+                        });
+            });
+        })
 }
 
 function bindButtonFunctions(userData: UserData, pomodoro: Pomodoro) {

@@ -8,7 +8,6 @@ export class UserData {
 
     constructor(client: HttpClient) {
         this.client = client;
-        this.loadSettings();
     }
 
     loadSettings() {

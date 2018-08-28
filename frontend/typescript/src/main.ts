@@ -3,11 +3,9 @@ import {Pomodoro} from "./logic/Pomodoro";
 import {PomodoroStats} from "./logic/PomodoroStats";
 import {TokenData} from "./model/TokenData";
 import {UserData} from "./logic/UserData";
-import { User } from "./model/User";
 
 let sound: HTMLAudioElement;
 
-const pomodoroLength = 10;
 const backendAddress = "http://localhost:9001";
 
 function parseJwt<T> (token: string) {
@@ -21,9 +19,8 @@ window.onload = () => {
     const authHeader = { Authorization : 'Basic ' + btoa(tokenData.email + ":" + tokenData.token) };
     const client = new HttpClient(backendAddress, authHeader);
     const pStats = new PomodoroStats(client);
-    const pomodoro = new Pomodoro(client, pomodoroLength, pStats);
     const userData = new UserData(client);
-    userData.loadSettings();
+    const pomodoro = new Pomodoro(client, userData, pStats);
 
     pomodoro.loadState();
     sound = new Audio("assets/sounds/tool.mp3");
@@ -38,6 +35,10 @@ function bindButtonFunctions(userData: UserData, pomodoro: Pomodoro) {
         () => pomodoro.stopTimer();
     document.getElementById("settings-save").onclick = 
         () => userData.saveSettings();
+    document.getElementById("pomodoro-length").onchange = 
+        () => userData.checkIfChanged();
+    document.getElementById("break-length").onchange = 
+        () => userData.checkIfChanged();
 }
 
 function playSound() {

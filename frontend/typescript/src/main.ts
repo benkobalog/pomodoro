@@ -25,26 +25,16 @@ window.onload = () => {
 
     pStats
         .updateLastPomodoros()
+        .then(() => userData.loadSettings())
+        .then(() => pomodoro.loadState())
         .then(() => {
-            userData
-                .loadSettings()
-                .then(() => {
-                    pomodoro
-                        .loadState()
-                        .then(() => {
-                            sound = new Audio("assets/sounds/tool.mp3");
-                            bindButtonFunctions(userData, pomodoro);
-                            console.log("Initial data loaded");
-                        });
-            });
-        })
+            sound = new Audio("assets/sounds/tool.mp3");
+            bindButtonFunctions(userData, pomodoro);
+            console.log("Initial data loaded");
+        });
 }
 
 function bindButtonFunctions(userData: UserData, pomodoro: Pomodoro) {
-    document.getElementById("start-button").onclick =
-        () => pomodoro.startTimer();
-    document.getElementById("stop-button").onclick = 
-        () => pomodoro.stopTimer();
     document.getElementById("settings-save").onclick = 
         () => userData.saveSettings();
     document.getElementById("pomodoro-length").onchange = 

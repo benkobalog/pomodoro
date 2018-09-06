@@ -9,7 +9,7 @@ import slick.jdbc.PostgresProfile.api._
 import scala.concurrent.{ExecutionContext, Future}
 import model.User
 
-class UserPsqlRepo(implicit db: DatabaseDef, ec: ExecutionContext) {
+class UserRepo(implicit db: DatabaseDef, ec: ExecutionContext) {
   import dao.Tables.Users
 
   def updateById(user: User): Future[Int] = {

@@ -5,7 +5,8 @@ import akka.http.scaladsl.server.directives.DebuggingDirectives
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import endpoints._
-import repository.postgres.{PasswordRepo, PomodoroPqslRepo, UserPsqlRepo}
+import logic.PomodoroLogic
+import repository.postgres.{PasswordRepo, PomodoroRepo, UserRepo}
 
 import scala.concurrent.ExecutionContextExecutor
 import scala.io.StdIn
@@ -17,10 +18,12 @@ object Server {
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
     import repository.PostgresConnection.db
-    implicit val pomodoroRepo: PomodoroPqslRepo = new PomodoroPqslRepo
-    implicit val userRepo: UserPsqlRepo = new UserPsqlRepo
+    implicit val pomodoroRepo: PomodoroRepo = new PomodoroRepo
+    implicit val userRepo: UserRepo = new UserRepo
     implicit val pwRepo: PasswordRepo = new PasswordRepo
     implicit val authentication: Authentication = new Authentication
+    implicit val pomodoroLogic: PomodoroLogic = new PomodoroLogic
+
 
     val routes = (userId: java.util.UUID) => {
       PomodoroEndpoints(userId) ~

@@ -2,6 +2,9 @@ val slickVersion = "3.2.2"
 val circeVersion = "0.9.1"
 
 libraryDependencies ++= Seq(
+  "com.softwaremill.macwire" %% "macros" % "2.3.0" % "provided",
+  "com.softwaremill.macwire" %% "macrosakka" % "2.3.0" % "provided",
+
   "io.circe" %% "circe-core" % circeVersion,
   "io.circe" %% "circe-generic" % circeVersion,
   "io.circe" %% "circe-parser" % circeVersion,

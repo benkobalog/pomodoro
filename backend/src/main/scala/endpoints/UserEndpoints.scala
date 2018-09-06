@@ -7,11 +7,11 @@ import akka.http.scaladsl.server.Route
 import io.circe.generic.auto._
 import io.circe.syntax._
 import model.User
-import repository.postgres.UserPsqlRepo
+import repository.postgres.UserRepo
 import utils.implicits.AkkaHttpMarshaller._
 import utils.implicits.Circe._
 
-class UserEndpoints(implicit userRepo: UserPsqlRepo) {
+class UserEndpoints(implicit userRepo: UserRepo) {
 
   def route(userId: UUID): Route = {
     path("user") {
@@ -32,6 +32,6 @@ class UserEndpoints(implicit userRepo: UserPsqlRepo) {
 }
 
 object UserEndpoints {
-  def apply(userId: UUID)(implicit userRepo: UserPsqlRepo): Route =
+  def apply(userId: UUID)(implicit userRepo: UserRepo): Route =
     new UserEndpoints().route(userId)
 }

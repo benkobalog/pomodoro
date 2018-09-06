@@ -1,11 +1,11 @@
 package endpoints
 
 import model.GeneratedPassword
-import repository.postgres.{PasswordRepo, UserPsqlRepo}
+import repository.postgres.{PasswordRepo, UserRepo}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class Authentication(implicit userRepo: UserPsqlRepo,
+class Authentication(implicit userRepo: UserRepo,
                      passwordRepo: PasswordRepo,
                      ec: ExecutionContext) {
 

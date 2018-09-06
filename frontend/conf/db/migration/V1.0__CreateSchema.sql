@@ -24,6 +24,7 @@ CREATE TABLE pomodoro (
  id uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
  started TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
  finished TIMESTAMP,
+ kind VARCHAR(16) NOT NULL DEFAULT 'pomodoro',
  users_id uuid REFERENCES users(id)
 );
 

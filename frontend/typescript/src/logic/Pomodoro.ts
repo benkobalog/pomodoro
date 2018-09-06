@@ -24,23 +24,43 @@ export class Pomodoro {
     }
     
     private savePomodoroFinish() {
+        console.trace();
         return this
             .client
             .httpPatch("/pomodoroFinish", response => console.info("Result of pomodoro finish: " + response));
     }
 
     private createTimer(pomodoroLength: number) {
+        if (this.timer != null) {
+            clearInterval(this.timer);
+        }
+
         let secondsElapsed = 1;
         const interval = window.setInterval(() => {
             drawTimer(pomodoroLength - secondsElapsed);
             if (secondsElapsed >= pomodoroLength) {
                 clearInterval(interval);
                 // playSound();
-                this.stopTimer();
+                this.stopAll();
             }
             secondsElapsed += 1;
         }, 1000);
         return interval;
+    }
+
+    private stateToIdle() {
+        this.pomodoroState = States.Idle;
+        setButtons(this.pomodoroState, this);
+    }
+
+    private stateToPomodoro() {
+        this.pomodoroState = States.Running;
+        setButtons(this.pomodoroState, this);
+    }
+
+    private stateToBreak() {
+        this.pomodoroState = States.Break;
+        setButtons(this.pomodoroState, this);
     }
 
     private resetTimer(seconds: number) {
@@ -62,23 +82,31 @@ export class Pomodoro {
                 this.resetTimer(pomodoroSeconds - data.Running.secondsElapsed);
                 this.timer = this.createTimer(pomodoroSeconds - data.Running.secondsElapsed);
             }
-            setButtons(this.pomodoroState);
+            setButtons(this.pomodoroState, this);
         });
     }
 
-    startTimer() {
-        this.pomodoroState = States.Running;
+    startPomodoro() {
+        this.stateToPomodoro();
         this.savePomodoroStart()
             .then(_ => this.timer = this.createTimer(this.userData.getUser().pomodoroSeconds));
-        setButtons(this.pomodoroState);
+    }
+
+    endPomodoro() {
+        this.stateToBreak();
+        this.resetTimer(this.userData.getUser().breakSeconds);
+        this.savePomodoroFinish()
+            .then(_ => this.timer = this.createTimer(this.userData.getUser().breakSeconds));
     }
     
-    stopTimer() {
-        this.pomodoroState = States.Idle;
+    stopAll() {
+        const previousState = this.pomodoroState;
+        this.stateToIdle();
         this.resetTimer(this.userData.getUser().pomodoroSeconds);
-        // playSound();
-        this.savePomodoroFinish()
-            .then(_ => this.pStats.updateLastPomodoros());
-        setButtons(this.pomodoroState);
+        if(previousState == States.Running) {
+            console.log("Stop all save pomodoro");
+            this.savePomodoroFinish()
+                .then(_ => this.pStats.updateLastPomodoros());
+        }
     }
 }

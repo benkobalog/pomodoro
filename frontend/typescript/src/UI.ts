@@ -1,23 +1,35 @@
 import {States} from "./model/States";
 import {User} from "./model/User";
+import { Pomodoro } from "./logic/Pomodoro";
 
-export function setButtons(pomodoroState: any) {
+export function setButtons(pomodoroState: any, pomodoro: Pomodoro) {
     console.info("Setting buttons: " + JSON.stringify(pomodoroState));
     switch(pomodoroState) {
         case States.Idle: {
+            // $("#stop-button" ).prop("disabled", true);
+            $("#start-button").html("Start Pomodoro");
             $("#stop-button" ).prop("disabled", true);
-            $("#start-button").prop("disabled", false);
+            // $("#start-button").prop("disabled", false);
             $("#pomodoro-timer-wrapper").css("background-color", 'White');
+            $("#start-button").click(() => pomodoro.startPomodoro());
             break;
         }
         case States.Running: {
+            // $("#stop-button" ).prop("disabled", false);
+            // $("#start-button").prop("disabled", true);
             $("#stop-button" ).prop("disabled", false);
-            $("#start-button").prop("disabled", true);
+            $("#start-button").html("Start Break");
+            $("#stop-button" ).html("Stop Session");
             $("#pomodoro-timer-wrapper").css("background-color", 'LightGrey');
+            $("#start-button").click(() => pomodoro.endPomodoro());
+            $("#stop-button").click(() => pomodoro.stopAll());
             break;
         }
         case States.Break: {
+            $("#stop-button" ).prop("disabled", false);
+            $("#stop-button" ).html("Stop Session");
             $("#pomodoro-timer-wrapper").css("background-color", 'GainsBoro');
+            $("#stop-button").click(() => pomodoro.stopAll());
             break;
         }
     }

@@ -6,38 +6,44 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import io.circe.generic.auto._
 import io.circe.syntax._
-import repository.postgres.PomodoroPqslRepo
+import logic.PomodoroLogic
+import repository.postgres.PomodoroRepo
 import utils.implicits.AkkaHttpMarshaller._
 import utils.implicits.Circe._
 
-class PomodoroEndpoints(implicit pomodoroRepo: PomodoroPqslRepo) {
+class PomodoroEndpoints(implicit pomodoroLogic: PomodoroLogic) {
 
   def route(userId: UUID): Route =
     path("pomodoroStart") {
       post {
-        onComplete(pomodoroRepo.start(userId))(respond(_ =>
+        onComplete(pomodoroLogic.start(userId))(respond(_ =>
           "Pomodoro successfully started"))
       }
     } ~
       path("pomodoroFinish") {
         patch {
-          onComplete(pomodoroRepo.finish(userId))(respond(_ =>
+          onComplete(pomodoroLogic.finish(userId))(respond(_ =>
             "Pomodoro successfully closed"))
         }
       } ~
       path("pomodoro") {
         get {
-          onComplete(pomodoroRepo.getStats(userId))(respond(_.asJson))
+          handleWebSocketMessages(pomodoroLogic.webSocket(userId))
+        }
+      } ~
+      path("pomodoroStats") {
+        get {
+          onComplete(pomodoroLogic.list(userId))(respond(_.asJson))
         }
       } ~
       path("pomodoroState") {
         get {
-          onComplete(pomodoroRepo.getState(userId))(respond(_.asJson))
+          onComplete(pomodoroLogic.getState(userId))(respond(_.asJson))
         }
       }
 }
 
 object PomodoroEndpoints {
-  def apply(userId: UUID)(implicit pomodoroRepo: PomodoroPqslRepo): Route =
+  def apply(userId: UUID)(implicit pomodoroLogic: PomodoroLogic): Route =
     new PomodoroEndpoints().route(userId)
 }

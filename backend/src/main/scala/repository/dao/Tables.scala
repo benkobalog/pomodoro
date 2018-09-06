@@ -1,6 +1,6 @@
 package repository.dao
 
-import model.{GeneratedPassword, OAuthToken, Pomodoro, User}
+import model._
 import slick.lifted.ProvenShape
 
 object Tables extends {
@@ -21,12 +21,12 @@ trait Tables {
   class PomodoroTemplate(_tableTag: Tag)
       extends profile.api.Table[Pomodoro](_tableTag, "pomodoro") {
     def * =
-      (id, started, finished, usersId) <> (Pomodoro.tupled, Pomodoro.unapply)
+      (id, started, finished, kind, usersId) <> (Pomodoro.tupled, Pomodoro.unapply)
     def ? =
-      (Rep.Some(id), Rep.Some(started), finished, usersId).shaped
+      (Rep.Some(id), Rep.Some(started), finished, Rep.Some(kind), usersId).shaped
         .<>({ r =>
               import r._
-              _1.map(_ => Pomodoro.tupled((_1.get, _2.get, _3, _4)))
+              _1.map(_ => Pomodoro.tupled((_1.get, _2.get, _3, _4.get, _5)))
             },
             (_: Any) =>
               throw new Exception("Inserting into ? projection not supported."))
@@ -35,6 +35,7 @@ trait Tables {
     val started = column[java.sql.Timestamp]("started")
     val finished =
       column[Option[java.sql.Timestamp]]("finished", O.Default(None))
+    val kind = column[String]("kind")
     val usersId = column[Option[java.util.UUID]]("users_id", O.Default(None))
 
     lazy val usersFk = foreignKey("pomodoro_users_id_fkey", usersId, Users)(

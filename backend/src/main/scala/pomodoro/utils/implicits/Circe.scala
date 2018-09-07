@@ -1,4 +1,4 @@
-package pomodoro.implicits
+package pomodoro.utils.implicits
 
 import java.sql.Timestamp
 import java.time.Duration

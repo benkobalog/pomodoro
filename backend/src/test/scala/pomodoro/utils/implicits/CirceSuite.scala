@@ -1,8 +1,8 @@
-package pomodoro.implicits
+package pomodoro.utils.implicits
 
 import org.scalatest._
 import java.time.Duration
-import pomodoro.implicits.Circe.durationFormatter
+import pomodoro.utils.implicits.Circe.durationFormatter
 
 class CirceSuite extends FunSuite with Matchers {
 

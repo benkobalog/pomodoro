@@ -1,4 +1,4 @@
-package pomodoro.implicits
+package pomodoro.utils.implicits
 
 import io.circe._
 import io.circe.parser._

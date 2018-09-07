@@ -8,8 +8,8 @@ import io.circe.generic.auto._
 import io.circe.syntax._
 import pomodoro.logic.PomodoroLogic
 import pomodoro.repository.postgres.PomodoroRepo
-import pomodoro.implicits.AkkaHttpMarshaller._
-import pomodoro.implicits.Circe._
+import pomodoro.utils.implicits.AkkaHttpMarshaller._
+import pomodoro.utils.implicits.Circe._
 
 class PomodoroEndpoints(implicit pomodoroLogic: PomodoroLogic) {
 

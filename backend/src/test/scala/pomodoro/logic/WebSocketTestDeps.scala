@@ -3,10 +3,10 @@ package pomodoro.logic
 import pomodoro.Dependencies
 import pomodoro.model.PomodoroState
 import pomodoro.model.wsmessage.{ControlResponse, SwitchToIdle, UserRequest}
-import pomodoro.repository.PomodoroRepoTrait
+import pomodoro.repository.PomodoroRepo
 
 trait WebSocketTestDeps extends Dependencies {
-  override lazy val pomodoroRepo: PomodoroRepoTrait = new PomodoroRepoStub()
+  override lazy val pomodoroRepo: PomodoroRepo = new PomodoroRepoStub()
 
   override lazy val pomodoroLogic: PomodoroLogic = new PomodoroLogic {
     override def stateChanges(

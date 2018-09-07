@@ -9,8 +9,8 @@ import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class PomodoroRepo(db: DatabaseDef)(implicit ec: ExecutionContext)
-    extends PomodoroRepoTrait {
+class PomodoroPsqlRepo(db: DatabaseDef)(implicit ec: ExecutionContext)
+    extends PomodoroRepo {
   import dao.Tables.Pomodoros
 
   def start(usersId: UUID): Future[Int] = {

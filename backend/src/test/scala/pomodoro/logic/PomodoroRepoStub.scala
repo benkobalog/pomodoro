@@ -3,7 +3,7 @@ package pomodoro.logic
 import java.util.UUID
 
 import pomodoro.model._
-import pomodoro.repository.PomodoroRepoTrait
+import pomodoro.repository.{PomodoroRepoTrait, PomodoroStatsRepo}
 
 import scala.concurrent.Future
 
@@ -16,12 +16,12 @@ class PomodoroRepoStub extends PomodoroRepoTrait {
     Future.successful(1)
   }
 
-  override def getStats(usersId: UUID,
-                        amount: Int = 5): Future[Seq[PomodoroStats]] = {
-    Future.successful(Seq())
-  }
-
   override def getState(usersId: UUID): Future[PomodoroState] = {
     Future.successful(Idle)
   }
+}
+
+class PomodoroStatsRepoStub extends PomodoroStatsRepo {
+  override def getStats(usersId: UUID, amount: Int): Future[Seq[PomodoroStats]] =
+    Future.successful(Seq())
 }

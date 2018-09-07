@@ -13,14 +13,15 @@ import io.circe.generic.auto._
 import io.circe.syntax._
 import pomodoro.logic.WebSocketActor.{ConnectWsHandle, UserAction, WsHandleDropped}
 import pomodoro.logic.{ActorEventBus, PomodoroLogic, WebSocketActor}
-import pomodoro.repository.PomodoroRepoTrait
+import pomodoro.repository.PomodoroStatsRepo
+import pomodoro.repository.postgres.PomodoroStatsPsqlRepo
 import pomodoro.utils.implicits.AkkaHttpMarshaller._
 import pomodoro.utils.implicits.Circe._
 
 import scala.concurrent.duration._
 
 class PomodoroEndpoints(pomodoroLogic: PomodoroLogic,
-                        pomodoroRepo: PomodoroRepoTrait,
+                        pStatsRepo: PomodoroStatsRepo,
                         logic: PomodoroLogic)(
     implicit actorEventBus: ActorEventBus,
     system: ActorSystem) {
@@ -33,7 +34,7 @@ class PomodoroEndpoints(pomodoroLogic: PomodoroLogic,
     } ~
       path("pomodoroStats") {
         get {
-          onComplete(pomodoroRepo.getStats(userId))(respond(_.asJson))
+          onComplete(pStatsRepo.getStats(userId))(respond(_.asJson))
         }
       }
 

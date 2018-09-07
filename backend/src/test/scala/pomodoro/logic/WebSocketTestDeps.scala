@@ -14,4 +14,6 @@ trait WebSocketTestDeps extends Dependencies {
                                state: PomodoroState): Option[(ControlResponse, PomodoroState)] =
       Some(SwitchToIdle, state)
   }
+
+  override lazy val pStatsRepo = new PomodoroStatsRepoStub()
 }

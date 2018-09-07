@@ -16,12 +16,6 @@ class WebSocketStreamSpec
     extends FunSuite
     with Matchers
     with WebSocketTestDeps {
-  implicit def urToMessage(ur: UserRequest): Message =
-    TextMessage.Strict(ur.asJson.noSpaces)
-
-  implicit def urToMessage(cr: ControlResponse): Message =
-    TextMessage.Strict(cr.asJson.noSpaces)
-
   test("One stream") {
     val flow = pomodoroEndpoints.webSocketHandler(UUID.randomUUID())
 
@@ -69,5 +63,10 @@ class WebSocketStreamSpec
       .toMat(TestSink.probe[B])(Keep.both)
       .run()
   }
-}
 
+  private implicit def urToMessage(ur: UserRequest): Message =
+    TextMessage.Strict(ur.asJson.noSpaces)
+
+  private implicit def urToMessage(cr: ControlResponse): Message =
+    TextMessage.Strict(cr.asJson.noSpaces)
+}

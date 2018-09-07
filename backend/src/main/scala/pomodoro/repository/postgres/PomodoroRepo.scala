@@ -32,20 +32,6 @@ class PomodoroRepo(db: DatabaseDef)(implicit ec: ExecutionContext)
     } yield nrUpdated)
   }
 
-  def getStats(usersId: UUID, amount: Int = 5): Future[Seq[PomodoroStats]] = {
-    db.run(
-      Pomodoros
-        .filter(_.usersId === usersId)
-        .filter(_.finished.nonEmpty)
-        .filter(_.kind === "pomodoro")
-        .sortBy(_.finished.desc)
-        .take(amount)
-        .map(row => (row.started, row.finished.get))
-        .result
-        .map(_.map(x => PomodoroStats.fromInterval(x._1, x._2)))
-    )
-  }
-
   def getState(usersId: UUID): Future[PomodoroState] = {
     db.run(
       for {

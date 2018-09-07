@@ -13,7 +13,7 @@ object Server extends Dependencies {
 
     val routes = (userId: java.util.UUID) => {
       pomodoroEndpoints.route(userId) ~
-        authenticationEndpoints.route ~
+        authEndpoints.route ~
         userEndpoints.route(userId)
     }
 

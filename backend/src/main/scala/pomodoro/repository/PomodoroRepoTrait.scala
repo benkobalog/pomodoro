@@ -1,4 +1,4 @@
-package pomodoro.repository.postgres
+package pomodoro.repository
 
 import java.util.UUID
 

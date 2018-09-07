@@ -1,65 +1,42 @@
 package pomodoro.logic
 
-import java.util.UUID
+import java.sql.Timestamp
 
-import akka.NotUsed
-import akka.actor.ActorSystem
-import akka.http.scaladsl.model.ws.{Message, TextMessage}
-import akka.stream.scaladsl.{Flow, Sink, Source}
-import akka.stream.{ActorMaterializer, OverflowStrategy}
-import pomodoro.model.{PomodoroState, PomodoroStats}
-import pomodoro.repository.postgres.PomodoroRepoTrait
+import pomodoro.model._
+import pomodoro.model.wsmessage._
 
-import scala.concurrent.Future
-import scala.concurrent.duration._
+trait PomodoroLogic {
 
-class PomodoroLogic(pomodoroRepo: PomodoroRepoTrait)(
-    implicit
-    system: ActorSystem,
-    actorMaterializer: ActorMaterializer) {
+  def stateChanges(
+      message: UserRequest,
+      state: PomodoroState): Option[(ControlResponse, PomodoroState)] =
+    (message, state) match {
+      case (RequestInit, _) =>
+        (InitializeWith(state), state).some
 
-  private val pomodoroEventBus = new PomodoroEventBus
+      case (StartPomodoro, Idle) =>
+        (SwitchToPomodoro, Running(currentTime)).some
 
-  def list(userId: UUID): Future[Seq[PomodoroStats]] =
-    pomodoroRepo.getStats(userId)
+      case (StartBreak(kind), Running(_)) =>
+        (SwitchToBreak(kind), Break(kind, currentTime)).some
 
-  def getState(userId: UUID): Future[PomodoroState] =
-    pomodoroRepo.getState(userId)
+      case (EndPomodoro, Running(_)) =>
+        (SwitchToIdle, Idle).some
 
-  def start(userId: UUID): Future[Int] = pomodoroRepo.start(userId)
+      case (EndBreak, _: Break) =>
+        (SwitchToIdle, Idle).some
 
-  def finish(userId: UUID): Future[Int] = pomodoroRepo.finish(userId)
+      case _ => None
+    }
 
-  def webSocket(userId: UUID): Flow[Message, Message, NotUsed] = {
-    import WebSocketActor._
-    val wsActor = system.actorOf(WebSocketActor.props(userId, pomodoroEventBus))
+  private def currentTime: Timestamp =
+    java.sql.Timestamp.valueOf(java.time.LocalDateTime.now())
 
-    val sink: Sink[Message, NotUsed] =
-      Flow[Message]
-        .collect { case TextMessage.Strict(str) => UserAction(str) }
-        .to(Sink.actorRef(wsActor, WsHandleDropped)) // connect to the wsUser Actor
-
-    val source: Source[Message, NotUsed] =
-      Source
-        .actorRef(bufferSize = 10,
-                  overflowStrategy = OverflowStrategy.dropBuffer)
-        .map { c: String =>
-          TextMessage.Strict(c)
-        }
-        .mapMaterializedValue { wsHandle =>
-          // the wsHandle is the way to talk back to the user, our wsUser actor needs to know about this to send
-          // messages to the WebSocket user
-          wsActor ! ConnectWsHandle(wsHandle)
-          // don't expose the wsHandle anymore
-          NotUsed
-        }
-        .keepAlive(maxIdle = 10.seconds,
-                   () =>
-                     TextMessage.Strict(
-                       "Keep-alive message sent to WebSocket recipient"))
-
-    Flow.fromSinkAndSource(sink, source)
+  private implicit class SomeOps[A](a: A) {
+    def some: Option[A] = Some(a)
   }
+}
 
-  val eventBus = new PomodoroEventBus()
+object PomodoroLogic extends PomodoroLogic {
+  def apply: PomodoroLogic = new PomodoroLogic(){}
 }

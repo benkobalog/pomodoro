@@ -3,47 +3,72 @@ package pomodoro.logic
 import java.util.UUID
 
 import akka.actor.{Actor, ActorRef, Props}
+import pomodoro.model._
+import io.circe.generic.auto._
+import io.circe.parser.decode
+import io.circe.syntax._
+import pomodoro.model.wsmessage.{ControlResponse, UserRequest}
+import pomodoro.utils.implicits.Circe._
 
-class WebSocketActor(userId: UUID, pomodoroEventBus: PomodoroEventBus)
+class WebSocketActor(userId: UUID,
+                     eventBus: ActorEventBus,
+                     logic: PomodoroLogic)
     extends Actor {
   import WebSocketActor._
   private var wsHandle: Option[ActorRef] = None
+  private var state: PomodoroState = _
 
   override def preStart(): Unit = {
-    pomodoroEventBus.subscribe(self, userId)
+    eventBus.subscribe(self, userId)
+    state = Idle
   }
 
   override def receive: Receive = {
-    case c: Command =>
+    case c: Connection =>
       c match {
         // `actorRef` is a handle to communicate back to the WebSocket user
         case ConnectWsHandle(actorRef) =>
-          println("Stream connected to WebSocketActor")
+          println(s"New client connected with userId $userId")
           wsHandle = Some(actorRef)
 
         case WsHandleDropped =>
           println(
             "Downstream WebSocket has been disconnected, stopping " + userId)
-          pomodoroEventBus.unsubscribe(self)
-
-        case UserAction(message) =>
-          println("Got a UserAction")
-          pomodoroEventBus.publish(EventBusMessage(userId, message))
+          eventBus.unsubscribe(self)
       }
 
-    case x: String =>
-      println("Got a message from the eventbus ")
-      println(x)
-      wsHandle.foreach(_ ! x)
+    case UserAction(message) =>
+      println("Got a UserAction")
+      decode[UserRequest](message) match {
+        case Left(e) => println("Invalid ws message: " + e)
+        case Right(m) =>
+          logic
+            .stateChanges(m, state)
+            .foreach {
+              case (response, newState) =>
+                state = newState
+                eventBus.publish(EventBusMessage(userId, response))
+            }
+      }
+
+    case cr: ControlResponse =>
+      println("Got a message from the eventbus: " + cr)
+      replyToUser(cr)
   }
+
+  private def replyToUser(controlResponse: ControlResponse): Unit =
+    wsHandle.foreach(_ ! controlResponse.asJson.noSpaces)
 }
 
 object WebSocketActor {
-  sealed trait Command
-  case class ConnectWsHandle(actorRef: ActorRef) extends Command
-  case object WsHandleDropped extends Command
-  case class UserAction(message: String) extends Command
+  sealed trait Connection
+  case class ConnectWsHandle(actorRef: ActorRef) extends Connection
+  case object WsHandleDropped extends Connection
 
-  def props(userId: UUID, pomodoroEventBus: PomodoroEventBus): Props =
-    Props(new WebSocketActor(userId, pomodoroEventBus))
+  case class UserAction(message: String) extends AnyVal
+
+  def props(userId: UUID,
+            eventBus: ActorEventBus,
+            logic: PomodoroLogic): Props =
+    Props(new WebSocketActor(userId, eventBus, logic))
 }

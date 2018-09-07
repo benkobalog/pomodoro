@@ -4,13 +4,9 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.softwaremill.macwire._
 import pomodoro.endpoints._
-import pomodoro.logic.PomodoroLogic
-import pomodoro.repository.postgres.{
-  PasswordRepo,
-  PomodoroRepo,
-  PomodoroRepoTrait,
-  UserRepo
-}
+import pomodoro.logic.{ActorEventBus, PomodoroLogic}
+import pomodoro.repository.PomodoroRepoTrait
+import pomodoro.repository.postgres.{PasswordRepo, PomodoroRepo, UserRepo}
 import slick.jdbc.JdbcBackend
 
 import scala.concurrent.ExecutionContextExecutor
@@ -19,6 +15,7 @@ trait Dependencies {
   implicit val system: ActorSystem = ActorSystem("webserver-system")
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
+  implicit val actorEventBus: ActorEventBus = new ActorEventBus()
 
   lazy val dbConnection: JdbcBackend.Database = repository.PostgresConnection.db
   lazy val pomodoroRepo: PomodoroRepoTrait = wire[PomodoroRepo]

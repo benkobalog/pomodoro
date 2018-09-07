@@ -59,11 +59,9 @@ class PomodoroRepo(db: DatabaseDef)(implicit ec: ExecutionContext)
           .map {
             case None => Idle
             case Some((started, current, "pomodoro")) =>
-              Running((current.getTime - started.getTime) / 1000)
-            case Some((started, current, "break")) =>
-              Break
-            case Some((started, current, "long break")) =>
-              LongBreak
+              Running(started)
+            case Some((started, current, kind)) =>
+              Break(kind, started)
           }
       } yield result
     )

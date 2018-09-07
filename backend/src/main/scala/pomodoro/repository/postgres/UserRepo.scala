@@ -3,13 +3,13 @@ package postgres
 
 import java.util.UUID
 
+import pomodoro.model.User
 import slick.jdbc.JdbcBackend.DatabaseDef
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
-import pomodoro.model.User
 
-class UserRepo(implicit db: DatabaseDef, ec: ExecutionContext) {
+class UserRepo(db: DatabaseDef)(implicit ec: ExecutionContext) {
   import dao.Tables.Users
 
   def updateById(user: User): Future[Int] = {

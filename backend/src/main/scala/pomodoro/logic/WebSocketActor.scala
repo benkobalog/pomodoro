@@ -3,7 +3,6 @@ package pomodoro.logic
 import java.util.UUID
 
 import akka.actor.{Actor, ActorRef, Props}
-import akka.http.scaladsl.model.ws.TextMessage
 
 class WebSocketActor(userId: UUID, pomodoroEventBus: PomodoroEventBus)
     extends Actor {

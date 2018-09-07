@@ -1,41 +1,24 @@
 package pomodoro
 
-import akka.actor.ActorSystem
 import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.directives.DebuggingDirectives
-import akka.stream.ActorMaterializer
-import endpoints._
-import logic.PomodoroLogic
-import repository.postgres.{PasswordRepo, PomodoroRepo, UserRepo}
+import pomodoro.endpoints._
 
-import scala.concurrent.ExecutionContextExecutor
 import scala.io.StdIn
 
-object Server {
+object Server extends Dependencies {
   def main(args: Array[String]): Unit = {
-    implicit val system: ActorSystem = ActorSystem("webserver-system")
-    implicit val materializer: ActorMaterializer = ActorMaterializer()
-    implicit val executionContext: ExecutionContextExecutor = system.dispatcher
-
-    import repository.PostgresConnection.db
-    implicit val pomodoroRepo: PomodoroRepo = new PomodoroRepo
-    implicit val userRepo: UserRepo = new UserRepo
-    implicit val pwRepo: PasswordRepo = new PasswordRepo
-    implicit val authentication: Authentication = new Authentication
-    implicit val pomodoroLogic: PomodoroLogic = new PomodoroLogic
-
 
     val routes = (userId: java.util.UUID) => {
-      PomodoroEndpoints(userId) ~
-        AuthenticationEndpoints() ~
-        UserEndpoints(userId)
+      pomodoroEndpoints.route(userId) ~
+        authenticationEndpoints.route ~
+        userEndpoints.route(userId)
     }
 
     val routeWithCorsAndAuth = CORSHandler.corsHandler(
-      new RouteAuthentication()
-        .routeWithAuthentication(routes))
+      routeAuthentication.routeWithAuthentication(routes))
 
     val port = 9001
 

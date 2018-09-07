@@ -7,11 +7,10 @@ import akka.http.scaladsl.server.Route
 import io.circe.generic.auto._
 import io.circe.syntax._
 import pomodoro.logic.PomodoroLogic
-import pomodoro.repository.postgres.PomodoroRepo
 import pomodoro.utils.implicits.AkkaHttpMarshaller._
 import pomodoro.utils.implicits.Circe._
 
-class PomodoroEndpoints(implicit pomodoroLogic: PomodoroLogic) {
+class PomodoroEndpoints(pomodoroLogic: PomodoroLogic) {
 
   def route(userId: UUID): Route =
     path("pomodoroStart") {
@@ -41,9 +40,4 @@ class PomodoroEndpoints(implicit pomodoroLogic: PomodoroLogic) {
           onComplete(pomodoroLogic.getState(userId))(respond(_.asJson))
         }
       }
-}
-
-object PomodoroEndpoints {
-  def apply(userId: UUID)(implicit pomodoroLogic: PomodoroLogic): Route =
-    new PomodoroEndpoints().route(userId)
 }

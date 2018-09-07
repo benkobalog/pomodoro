@@ -1,10 +1,11 @@
 package pomodoro.logic
 
-import pomodoro.repository.postgres.PomodoroRepoTrait
+import java.util.UUID
+
 import pomodoro.model._
+import pomodoro.repository.postgres.PomodoroRepoTrait
 
 import scala.concurrent.Future
-import java.util.UUID
 
 class PomodoroRepoStub extends PomodoroRepoTrait {
   override def start(usersId: UUID): Future[Int] = {

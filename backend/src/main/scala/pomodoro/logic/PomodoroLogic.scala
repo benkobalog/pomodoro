@@ -3,19 +3,20 @@ package pomodoro.logic
 import java.util.UUID
 
 import akka.NotUsed
-import akka.actor.{ActorRef, ActorSystem}
+import akka.actor.ActorSystem
 import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.stream.{ActorMaterializer, OverflowStrategy}
 import pomodoro.model.{PomodoroState, PomodoroStats}
-import pomodoro.repository.postgres.{PomodoroRepo, PomodoroRepoTrait}
+import pomodoro.repository.postgres.PomodoroRepoTrait
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class PomodoroLogic(implicit pomodoroRepo: PomodoroRepoTrait,
-                    system: ActorSystem,
-                    actorMaterializer: ActorMaterializer) {
+class PomodoroLogic(pomodoroRepo: PomodoroRepoTrait)(
+    implicit
+    system: ActorSystem,
+    actorMaterializer: ActorMaterializer) {
 
   private val pomodoroEventBus = new PomodoroEventBus
 

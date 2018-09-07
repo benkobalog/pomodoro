@@ -7,8 +7,8 @@ import akka.http.scaladsl.server.Directives.authenticateBasicAsync
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.Credentials
 
-class RouteAuthentication(implicit authentication: Authentication,
-                          ec: ExecutionContext) {
+class RouteAuthentication(authentication: Authentication)(
+    implicit ec: ExecutionContext) {
 
   private def asyncAuthenticator(
       credentials: Credentials): Future[Option[UUID]] = {

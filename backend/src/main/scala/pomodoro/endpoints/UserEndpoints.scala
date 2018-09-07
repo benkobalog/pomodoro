@@ -11,7 +11,7 @@ import pomodoro.repository.postgres.UserRepo
 import pomodoro.utils.implicits.AkkaHttpMarshaller._
 import pomodoro.utils.implicits.Circe._
 
-class UserEndpoints(implicit userRepo: UserRepo) {
+class UserEndpoints(userRepo: UserRepo) {
 
   def route(userId: UUID): Route = {
     path("user") {
@@ -29,9 +29,4 @@ class UserEndpoints(implicit userRepo: UserRepo) {
         }
     }
   }
-}
-
-object UserEndpoints {
-  def apply(userId: UUID)(implicit userRepo: UserRepo): Route =
-    new UserEndpoints().route(userId)
 }

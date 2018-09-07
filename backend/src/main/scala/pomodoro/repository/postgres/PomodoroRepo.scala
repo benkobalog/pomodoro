@@ -3,13 +3,14 @@ package postgres
 
 import java.util.UUID
 
-import pomodoro.model.{PomodoroStats, PomodoroState, Running, Idle, Break, LongBreak}
+import pomodoro.model._
 import slick.jdbc.JdbcBackend.DatabaseDef
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class PomodoroRepo(implicit db: DatabaseDef, ec: ExecutionContext) extends PomodoroRepoTrait{
+class PomodoroRepo(db: DatabaseDef)(implicit ec: ExecutionContext)
+    extends PomodoroRepoTrait {
   import dao.Tables.Pomodoros
 
   def start(usersId: UUID): Future[Int] = {

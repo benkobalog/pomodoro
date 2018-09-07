@@ -7,14 +7,14 @@ import akka.stream.scaladsl.{Flow, Keep}
 import akka.stream.testkit.scaladsl.{TestSink, TestSource}
 import akka.stream.testkit.{TestPublisher, TestSubscriber}
 import org.scalatest._
-import pomodoro.repository.postgres.PomodoroRepoTrait
 
-class WebSocketStreamSpec extends FunSuite with Matchers with ActorResources {
-  implicit val pR: PomodoroRepoTrait = new PomodoroRepoStub()
+class WebSocketStreamSpec
+    extends FunSuite
+    with Matchers
+    with WebSocketTestDeps {
   implicit def stringToMessage(s: String): Message = TextMessage.Strict(s)
 
   test("one stream") {
-    val pomodoroLogic = new PomodoroLogic()
     val flow = pomodoroLogic.webSocket(UUID.randomUUID())
 
     val (pub, sub) = probeFlow(flow)
@@ -25,8 +25,6 @@ class WebSocketStreamSpec extends FunSuite with Matchers with ActorResources {
   }
 
   test("Two streams with the same userId") {
-    val pomodoroLogic = new PomodoroLogic()
-
     val userId = UUID.randomUUID()
 
     val flow1 = pomodoroLogic.webSocket(userId)

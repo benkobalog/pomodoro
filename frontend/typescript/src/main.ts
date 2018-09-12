@@ -1,8 +1,10 @@
 import {HttpClient} from "./HttpClient";
 import {Pomodoro} from "./logic/Pomodoro";
+import {PomodoroWs} from "./logic/PomodoroWs";
 import {PomodoroStats} from "./logic/PomodoroStats";
 import {TokenData} from "./model/TokenData";
 import {UserData} from "./logic/UserData";
+import {UserRequest, StartPomodoro} from "./model/UserRequest"
 
 let sound: HTMLAudioElement;
 
@@ -14,6 +16,19 @@ function parseJwt<T> (token: string) {
 };
 
 window.onload = () => {
+
+    const s = '{"StartPomodoro":{}}';
+
+    const ur = JSON.parse(s);
+
+    const str = JSON.stringify(new StartPomodoro());
+
+    console.log(str);
+    console.log(ur.hasOwnProperty("StartPomodoro"));
+
+
+
+    
     const backendAddress = 
         (<HTMLInputElement>document.getElementById("backend-address")).value;
     const tokenData = parseJwt<TokenData>(document.cookie.split('=')[1]);
@@ -23,10 +38,12 @@ window.onload = () => {
     const userData = new UserData(client);
     const pomodoro = new Pomodoro(client, userData, pStats);
 
+    const ws = new PomodoroWs(tokenData);
+    ws.doStuff();
+
     pStats
         .updateLastPomodoros()
         .then(() => userData.loadSettings())
-        .then(() => pomodoro.loadState())
         .then(() => {
             sound = new Audio("assets/sounds/tool.mp3");
             bindButtonFunctions(userData, pomodoro);

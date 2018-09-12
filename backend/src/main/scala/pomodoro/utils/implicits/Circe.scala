@@ -13,10 +13,6 @@ object Circe {
   def createDecoder[A](fn: => Decoder[A]): Decoder[A] =
     (hCursor: HCursor) => fn.apply(hCursor)
 
-  implicit val timeStampEncoder: Encoder[Timestamp] =
-    createEncoder(
-      timestamp => Json.fromString(timestamp.toString.takeWhile(_ != '.')))
-
   implicit val javaDurationEncoder: Encoder[Duration] =
     createEncoder { durationFormatter _ andThen Json.fromString }
 
@@ -33,7 +29,4 @@ object Circe {
 
   implicit val uuidDecoder: Decoder[UUID] =
     createDecoder(Decoder.decodeString.map(UUID.fromString))
-
-  implicit val timeStampDecoder: Decoder[Timestamp] =
-    createDecoder(Decoder.decodeString.map(Timestamp.valueOf))
 }

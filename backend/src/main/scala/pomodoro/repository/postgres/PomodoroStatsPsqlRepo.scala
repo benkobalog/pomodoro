@@ -25,7 +25,7 @@ class PomodoroStatsPsqlRepo(db: DatabaseDef)(implicit ec: ExecutionContext)
         .take(amount)
         .map(row => (row.started, row.finished.get))
         .result
-        .map(_.map(x => PomodoroStats.fromInterval(x._1, x._2)))
+        .map(_.map(x => PomodoroStats(x._1, x._2)))
     )
   }
 }

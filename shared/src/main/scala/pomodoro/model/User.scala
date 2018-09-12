@@ -2,7 +2,7 @@ package pomodoro.model
 
 case class User(id: java.util.UUID,
                 email: String,
-                createdAt: java.sql.Timestamp,
+                createdAt: Long,
                 pomodoroSeconds: Int,
                 breakSeconds: Int
                 // autoStartBreak: Boolean,

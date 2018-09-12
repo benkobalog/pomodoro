@@ -40,7 +40,8 @@ class WebSocketActor(userId: UUID,
     case UserAction(message) =>
       println("Got a UserAction")
       decode[UserRequest](message) match {
-        case Left(e) => println("Invalid ws message: " + e)
+        case Left(e) =>
+          println(s"Invalid ws message: {{$message}} exception: $e")
         case Right(m) =>
           logic
             .stateChanges(m, state)

@@ -12,7 +12,7 @@ class PomodoroRepoStub extends PomodoroRepo {
     Future.successful(1)
   }
 
-  override def finish(usersId: UUID): Future[Int] = {
+  override def finish(usersId: UUID, currentMillis: Long): Future[Int] = {
     Future.successful(1)
   }
 
@@ -22,6 +22,7 @@ class PomodoroRepoStub extends PomodoroRepo {
 }
 
 class PomodoroStatsRepoStub extends PomodoroStatsRepo {
-  override def getStats(usersId: UUID, amount: Int): Future[Seq[PomodoroStats]] =
+  override def getStats(usersId: UUID,
+                        amount: Int): Future[Seq[PomodoroStats]] =
     Future.successful(Seq())
 }

@@ -21,14 +21,14 @@ class PomodoroPsqlRepo(db: DatabaseDef)(implicit ec: ExecutionContext)
   private val current_timestamp =
     SimpleLiteral[java.sql.Timestamp]("CURRENT_TIMESTAMP")
 
-  def finish(usersId: UUID): Future[Int] = {
+  def finish(usersId: UUID,
+             currentMillis: Long = System.currentTimeMillis()): Future[Int] = {
     db.run(for {
-      timestamp <- current_timestamp.result
       nrUpdated <- Pomodoros
         .filter(_.usersId === usersId)
         .filter(_.finished.isEmpty)
         .map(_.finished)
-        .update(Some(timestamp))
+        .update(Some(currentMillis))
     } yield nrUpdated)
   }
 

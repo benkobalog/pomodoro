@@ -1,10 +1,9 @@
 package pomodoro.model
 
-import java.sql.Timestamp
 import java.util.UUID
 
 case class Pomodoro(id: java.util.UUID,
-                    started: Timestamp,
-                    finished: Option[Timestamp] = None,
+                    started: Long,
+                    finished: Option[Long] = None,
                     kind: String,
                     usersId: Option[UUID] = None)

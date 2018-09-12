@@ -8,7 +8,7 @@ export class PomodoroStats {
     }
 
     updateLastPomodoros() {
-        return this.client.httpGet("/pomodoro", data => {
+        return this.client.httpGet("/pomodoroStats", data => {
             const tableRow = (pomodoroData: any) => {
                 return `<tr>` +
                     `<td>${pomodoroData.duration}</td>` +

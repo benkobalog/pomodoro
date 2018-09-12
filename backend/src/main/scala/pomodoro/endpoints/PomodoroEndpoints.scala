@@ -11,7 +11,11 @@ import akka.stream.OverflowStrategy
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import io.circe.generic.auto._
 import io.circe.syntax._
-import pomodoro.logic.WebSocketActor.{ConnectWsHandle, UserAction, WsHandleDropped}
+import pomodoro.logic.WebSocketActor.{
+  ConnectWsHandle,
+  UserAction,
+  WsHandleDropped
+}
 import pomodoro.logic.{ActorEventBus, PomodoroLogic, WebSocketActor}
 import pomodoro.repository.PomodoroStatsRepo
 import pomodoro.repository.postgres.PomodoroStatsPsqlRepo
@@ -27,16 +31,18 @@ class PomodoroEndpoints(pomodoroLogic: PomodoroLogic,
     system: ActorSystem) {
 
   def route(userId: UUID): Route =
+    path("pomodoroStats") {
+      get {
+        onComplete(pStatsRepo.getStats(userId))(respond(_.asJson))
+      }
+    }
+
+  def webSocketRoute(userId: UUID): Route =
     path("pomodoro") {
       get {
         handleWebSocketMessages(webSocketHandler(userId))
       }
-    } ~
-      path("pomodoroStats") {
-        get {
-          onComplete(pStatsRepo.getStats(userId))(respond(_.asJson))
-        }
-      }
+    }
 
   def webSocketHandler(userId: UUID): Flow[Message, Message, NotUsed] = {
     val wsActor =

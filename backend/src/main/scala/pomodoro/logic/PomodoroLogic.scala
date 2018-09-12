@@ -1,7 +1,5 @@
 package pomodoro.logic
 
-import java.sql.Timestamp
-
 import pomodoro.model._
 import pomodoro.model.wsmessage._
 
@@ -29,8 +27,8 @@ trait PomodoroLogic {
       case _ => None
     }
 
-  private def currentTime: Timestamp =
-    java.sql.Timestamp.valueOf(java.time.LocalDateTime.now())
+  private def currentTime: Long =
+    System.currentTimeMillis()
 
   private implicit class SomeOps[A](a: A) {
     def some: Option[A] = Some(a)
@@ -38,5 +36,5 @@ trait PomodoroLogic {
 }
 
 object PomodoroLogic extends PomodoroLogic {
-  def apply: PomodoroLogic = new PomodoroLogic(){}
+  def apply: PomodoroLogic = new PomodoroLogic() {}
 }

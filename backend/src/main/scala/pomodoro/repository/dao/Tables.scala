@@ -32,9 +32,9 @@ trait Tables {
               throw new Exception("Inserting into ? projection not supported."))
 
     val id = column[java.util.UUID]("id", O.PrimaryKey)
-    val started = column[java.sql.Timestamp]("started")
+    val started = column[Long]("started")
     val finished =
-      column[Option[java.sql.Timestamp]]("finished", O.Default(None))
+      column[Option[Long]]("finished", O.Default(None))
     val kind = column[String]("kind")
     val usersId = column[Option[java.util.UUID]]("users_id", O.Default(None))
 
@@ -64,7 +64,7 @@ trait Tables {
 
     val id = column[java.util.UUID]("id", O.PrimaryKey)
     val email = column[String]("email", O.Length(191, varying = true))
-    val createdAt = column[java.sql.Timestamp]("created_at")
+    val createdAt = column[Long]("created_at")
     val pomodoroSeconds = column[Int]("pomodoro_seconds")
     val breakSeconds = column[Int]("break_seconds")
     val index1 = index("users_email_key", email, unique = true)

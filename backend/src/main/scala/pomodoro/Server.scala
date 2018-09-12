@@ -20,19 +20,32 @@ object Server extends Dependencies {
     val routeWithCorsAndAuth = CORSHandler.corsHandler(
       routeAuthentication.routeWithAuthentication(routes))
 
+    val websocket = routeAuthentication.routeWithAuthentication(
+      pomodoroEndpoints.webSocketRoute)
+
     val port = 9001
 
-    val bindingFuture =
+    val httpBind =
       Http().bindAndHandle(
-        DebuggingDirectives.logResult("stuff", Logging.InfoLevel)(
+        DebuggingDirectives.logResult("http", Logging.InfoLevel)(
           routeWithCorsAndAuth),
         "localhost",
         port)
 
+    val wsBind = Http().bindAndHandle(
+      DebuggingDirectives.logResult("ws", Logging.InfoLevel)(websocket),
+      "localhost",
+      port + 1)
+
     println(
       s"Server online at http://localhost:$port/\nPress RETURN to stop...")
     StdIn.readLine()
-    bindingFuture
+
+    httpBind
+      .flatMap(_.unbind())
+      .onComplete(_ => system.terminate())
+
+    wsBind
       .flatMap(_.unbind())
       .onComplete(_ => system.terminate())
   }

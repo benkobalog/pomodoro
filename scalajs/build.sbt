@@ -2,6 +2,9 @@ scalaJSUseMainModuleInitializer := true
 
 lazy val js = TaskKey[Unit]("js")
 
+addCompilerPlugin(
+  "org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
+
 js := {
   val oldTarget = (target in Compile).value.getAbsolutePath
   val base = baseDirectory.value.getAbsolutePath
@@ -26,10 +29,13 @@ libraryDependencies ++= Seq(
   "com.softwaremill.sttp" %%% "core" % "1.3.3",
 
   "com.thoughtworks.binding" %%% "binding" % "11.0.1",
+  "com.thoughtworks.binding" %%% "dom" % "11.0.1",
 
   "io.circe" %%% "circe-core" % circeVersion,
   "io.circe" %%% "circe-generic" % circeVersion,
   "io.circe" %%% "circe-parser" % circeVersion,
+
+//  "org.scala-lang.modules" %% "scala-xml" % "1.1.0",
 
   "org.scala-js" %%% "scalajs-dom" % "0.9.6"
   )

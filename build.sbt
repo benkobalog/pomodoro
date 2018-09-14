@@ -7,8 +7,13 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.12.6"
 )
 
-lazy val shared = (project in file("shared"))
+import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
+lazy val shared = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Pure)
+  .in(file("shared"))
   .settings(commonSettings)
+  .jsSettings()
+  .jvmSettings()
 
 lazy val root = (project in file("."))
   .enablePlugins(FlywayPlugin)
@@ -19,12 +24,12 @@ lazy val frontend = (project in file("frontend"))
 
 lazy val backend = (project in file("backend"))
   .settings(commonSettings)
-  .dependsOn(shared)
+  .dependsOn(shared.jvm)
 
 lazy val scalajs = (project in file("scalajs"))
   .settings(commonSettings)
   .enablePlugins(ScalaJSPlugin)
-  .dependsOn(shared)
+  .dependsOn(shared.js)
 
 flywayUrl := "jdbc:postgresql://localhost:5432/pomodoro"
 flywayUser := "postgres"

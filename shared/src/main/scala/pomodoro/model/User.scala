@@ -1,8 +1,9 @@
 package pomodoro.model
 
+
 case class User(id: java.util.UUID,
                 email: String,
-                createdAt: Long,
+                createdAt: Double,
                 pomodoroSeconds: Int,
                 breakSeconds: Int
                 // autoStartBreak: Boolean,

@@ -18,5 +18,18 @@ js := {
   println("Copied JS output")
 }
 
-//Compile / fastOptJS := ((Compile / fastOptJS) dependsOn copyJs).value
 js := (js dependsOn (Compile / fastOptJS)).value
+
+val circeVersion = "0.9.1"
+
+libraryDependencies ++= Seq(
+  "com.softwaremill.sttp" %%% "core" % "1.3.3",
+
+  "com.thoughtworks.binding" %%% "binding" % "11.0.1",
+
+  "io.circe" %%% "circe-core" % circeVersion,
+  "io.circe" %%% "circe-generic" % circeVersion,
+  "io.circe" %%% "circe-parser" % circeVersion,
+
+  "org.scala-js" %%% "scalajs-dom" % "0.9.6"
+  )

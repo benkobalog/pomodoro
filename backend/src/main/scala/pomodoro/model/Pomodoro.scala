@@ -3,7 +3,7 @@ package pomodoro.model
 import java.util.UUID
 
 case class Pomodoro(id: java.util.UUID,
-                    started: Long,
-                    finished: Option[Long] = None,
+                    started: Double,
+                    finished: Option[Double] = None,
                     kind: String,
                     usersId: Option[UUID] = None)

@@ -1,6 +1,6 @@
 package pomodoro.model
 
 case class PomodoroStats(
-    started: Long,
-    finished: Long
+    started: Double,
+    finished: Double
 )

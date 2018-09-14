@@ -16,19 +16,6 @@ function parseJwt<T> (token: string) {
 };
 
 window.onload = () => {
-
-    const s = '{"StartPomodoro":{}}';
-
-    const ur = JSON.parse(s);
-
-    const str = JSON.stringify(new StartPomodoro());
-
-    console.log(str);
-    console.log(ur.hasOwnProperty("StartPomodoro"));
-
-
-
-    
     const backendAddress = 
         (<HTMLInputElement>document.getElementById("backend-address")).value;
     const tokenData = parseJwt<TokenData>(document.cookie.split('=')[1]);

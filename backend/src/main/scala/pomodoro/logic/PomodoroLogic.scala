@@ -5,24 +5,23 @@ import pomodoro.model.wsmessage._
 
 trait PomodoroLogic {
 
-  def stateChanges(
-      message: UserRequest,
-      state: PomodoroState): Option[(ControlResponse, PomodoroState)] =
+  def stateChanges(message: UserRequest,
+                   state: PomodoroState): Option[PomodoroState] =
     (message, state) match {
       case (RequestInit, _) =>
-        (InitializeWith(state), state).some
+        state.some
 
       case (StartPomodoro, Idle) =>
-        (SwitchToPomodoro, Running(currentTime)).some
+        Running(currentTime).some
 
       case (StartBreak(kind), Running(_)) =>
-        (SwitchToBreak(kind), Break(kind, currentTime)).some
+        Break(kind, currentTime).some
 
       case (EndPomodoro, Running(_)) =>
-        (SwitchToIdle, Idle).some
+        Idle.some
 
       case (EndBreak, _: Break) =>
-        (SwitchToIdle, Idle).some
+        Idle.some
 
       case _ => None
     }

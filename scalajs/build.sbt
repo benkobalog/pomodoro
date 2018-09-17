@@ -35,7 +35,8 @@ libraryDependencies ++= Seq(
   "io.circe" %%% "circe-generic" % circeVersion,
   "io.circe" %%% "circe-parser" % circeVersion,
 
-//  "org.scala-lang.modules" %% "scala-xml" % "1.1.0",
+  "com.softwaremill.macwire" %% "macros" % "2.3.0" % "provided",
+  "com.softwaremill.macwire" %% "macrosakka" % "2.3.0" % "provided",
 
   "org.scala-js" %%% "scalajs-dom" % "0.9.6"
   )

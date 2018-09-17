@@ -1,30 +1,28 @@
 package pomodoro.logic
 
+import io.circe.generic.auto._
+import io.circe.syntax._
 import org.scalajs.dom
 import pomodoro.model.TokenData
 import pomodoro.model.wsmessage.{RequestInit, UserRequest}
-import io.circe.generic.auto._
-import io.circe.syntax._
 
-class PomodoroWS(td: TokenData) {
+class WebSocketClient(td: TokenData) {
 
   private val ws =
     new dom.WebSocket(s"ws://${td.email}:${td.token}@localhost:9002/pomodoro")
 
   ws.onopen = { e: dom.Event =>
-    println("Opened ws")
-    ws.send(toJson(RequestInit))
+    println("Opened ws connection")
+    sendMessage(RequestInit)
   }
 
-  ws.onmessage = { e: dom.MessageEvent =>
-    println(e.data.toString)
-    ws.send("FUck")
-  }
-
-  private def toJson(userRequest: UserRequest): String = userRequest.asJson.noSpaces
+  def setMessageHandler(fn: dom.MessageEvent => Unit): Unit =
+    ws.onmessage = fn
 
   def sendMessage(userRequest: UserRequest): Unit = {
     ws.send(toJson(userRequest))
   }
 
+  private def toJson(userRequest: UserRequest): String =
+    userRequest.asJson.noSpaces
 }

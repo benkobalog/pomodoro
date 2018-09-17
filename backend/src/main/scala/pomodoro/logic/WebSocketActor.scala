@@ -7,7 +7,7 @@ import pomodoro.model._
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.syntax._
-import pomodoro.model.wsmessage.{ControlResponse, UserRequest}
+import pomodoro.model.wsmessage.UserRequest
 import pomodoro.utils.implicits.Circe._
 
 class WebSocketActor(userId: UUID,
@@ -45,20 +45,19 @@ class WebSocketActor(userId: UUID,
         case Right(m) =>
           logic
             .stateChanges(m, state)
-            .foreach {
-              case (response, newState) =>
-                state = newState
-                eventBus.publish(EventBusMessage(userId, response))
+            .foreach { newState =>
+              state = newState
+              eventBus.publish(EventBusMessage(userId, newState))
             }
       }
 
-    case cr: ControlResponse =>
+    case cr: PomodoroState =>
       println("Got a message from the eventbus: " + cr)
       replyToUser(cr)
   }
 
-  private def replyToUser(controlResponse: ControlResponse): Unit =
-    wsHandle.foreach(_ ! controlResponse.asJson.noSpaces)
+  private def replyToUser(pomodoroState: PomodoroState): Unit =
+    wsHandle.foreach(_ ! pomodoroState.asJson.noSpaces)
 }
 
 object WebSocketActor {

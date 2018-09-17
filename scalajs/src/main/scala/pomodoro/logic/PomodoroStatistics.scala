@@ -18,7 +18,7 @@ class PomodoroStatistics(client: HttpClient) {
     client
       .get[Seq[PomodoroStats]]("http://localhost:9001/pomodoroStats")
       .map { ps =>
-        data.value
+        data.value.clear()
         data.value ++= ps
         ps
       }
@@ -30,7 +30,7 @@ class PomodoroStatistics(client: HttpClient) {
   @dom
   def button1: Binding[Button] = {
     <button onclick={e: Event =>
-      data.value
+      data.value.clear()
       data.value ++= Seq(PomodoroStats(1, 2))}
     >Add
     </button>

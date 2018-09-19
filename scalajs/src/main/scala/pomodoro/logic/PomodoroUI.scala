@@ -11,7 +11,7 @@ import pomodoro.model.wsmessage._
 
 import scala.scalajs.js.timers.{SetIntervalHandle, clearInterval, setInterval}
 
-class PomodoroUI(user: User, wsClient: WebSocketClient) {
+class PomodoroUI(user: User, wsClient: WebSocketClient, pStats: PomodoroStatistics) {
 
   wsClient.setMessageHandler { e: org.scalajs.dom.MessageEvent =>
     decode[PomodoroState](e.data.toString) match {
@@ -107,18 +107,21 @@ class PomodoroUI(user: User, wsClient: WebSocketClient) {
   private def updateState(pomodoroState: PomodoroState): Unit =
     pomodoroState match {
       case Idle =>
+        pStats.getStats
         timer.foreach(clearInterval)
         timerSeconds.value = user.pomodoroSeconds
         startButtonProps.value = idleButtons._1
         stopButtonProps.value = idleButtons._2
 
       case Break(kind, started) =>
+        pStats.getStats
         timerSeconds.value = user.breakSeconds
         createTimer(user.breakSeconds)
         startButtonProps.value = breakButtons._1
         stopButtonProps.value = breakButtons._2
 
       case Running(started) =>
+        pStats.getStats
         timerSeconds.value = user.pomodoroSeconds
         createTimer(user.pomodoroSeconds)
         startButtonProps.value = runningButtons._1

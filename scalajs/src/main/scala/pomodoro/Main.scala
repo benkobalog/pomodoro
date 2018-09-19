@@ -35,7 +35,7 @@ object Main {
       .get[User]("http://localhost:9001/user")
       .foreach { user =>
         val wsClient = new WebSocketClient(jwtData.data)
-        val ui = new PomodoroUI(user, wsClient)
+        val ui = new PomodoroUI(user, wsClient, pomodoroStats)
 
         println("Render Timer")
         dom.render(document.getElementById("timer"), ui.timerHtml())

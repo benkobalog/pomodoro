@@ -2,17 +2,12 @@ package pomodoro.logic
 
 import com.thoughtworks.binding.Binding.{BindingSeq, Var}
 import com.thoughtworks.binding.{Binding, dom}
-import io.circe.parser.decode
 import io.circe.generic.auto._
+import io.circe.parser.decode
 import org.scalajs.dom.Event
 import org.scalajs.dom.raw.Node
 import pomodoro.model._
-import pomodoro.model.wsmessage.{
-  EndBreak,
-  EndPomodoro,
-  StartBreak,
-  StartPomodoro
-}
+import pomodoro.model.wsmessage._
 
 import scala.scalajs.js.timers.{SetIntervalHandle, clearInterval, setInterval}
 
@@ -21,7 +16,7 @@ class PomodoroUI(user: User, wsClient: WebSocketClient) {
   wsClient.setMessageHandler { e: org.scalajs.dom.MessageEvent =>
     decode[PomodoroState](e.data.toString) match {
       case Left(err) =>
-        println(s"Failed to decode message: ${e.data.toString} ::: $err")
+        println(s"""Failed to decode message: "${e.data.toString}" ::: $err""")
       case Right(ps) =>
         println(s"Message: $ps")
         updateState(ps)
@@ -85,7 +80,7 @@ class PomodoroUI(user: User, wsClient: WebSocketClient) {
         <div class="card" id="pomodoro-timer-wrapper">
           <h2>
             <div class="card-body text-center" id="pomodoro-timer">
-              {secondsToTime(timerSeconds.bind)}
+              {showTime(timerSeconds.bind)}
             </div>
           </h2>
         </div>
@@ -130,11 +125,8 @@ class PomodoroUI(user: User, wsClient: WebSocketClient) {
         stopButtonProps.value = runningButtons._2
     }
 
-  private def secondsToTime(seconds: Long): String = {
-    val h = seconds / 3600
-    val m = seconds % 3600 / 60
-    val s = seconds % 3600 % 60
-
+  private def showTime(seconds: Long): String = {
+    val (h, m, s) = secondsToTime(seconds)
     f"${if (h == 0) "" else h + ":"}$m%02d:$s%02d"
   }
 }

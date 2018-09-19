@@ -1,16 +1,15 @@
 package pomodoro.logic
 
-import com.thoughtworks.binding.Binding.{BindingSeq, Var, Vars}
+import com.thoughtworks.binding.Binding.Vars
 import com.thoughtworks.binding.{Binding, dom}
 import io.circe.generic.auto._
-import org.scalajs.dom.Event
-import org.scalajs.dom.html.Button
 import org.scalajs.dom.raw.Node
 import pomodoro.HttpClient
 import pomodoro.model.PomodoroStats
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.scalajs.js.Date
 
 class PomodoroStatistics(client: HttpClient) {
 
@@ -26,42 +25,52 @@ class PomodoroStatistics(client: HttpClient) {
 
   private val data: Vars[PomodoroStats] = Vars.empty
 
-
-  @dom
-  def button1: Binding[Button] = {
-    <button onclick={e: Event =>
-      data.value.clear()
-      data.value ++= Seq(PomodoroStats(1, 2))}
-    >Add
-    </button>
-  }
   @dom
   def stats(): Binding[Node] = {
     <div>
-    {button1.bind}
-    <table class="table my-0">
-      <thead>
-        <tr>
-          <th>Duration</th>
-          <th>Started</th>
-          <th>Finished</th>
-        </tr>
-      </thead>
-      <tbody id="lastPomodorosTable">
-        {
-          for(stat <- data) yield {
-            <tr>
-              <td>
-                {stat.started.toString}
-              </td>
-              <td>
-                {stat.finished.toString}
-              </td>
-            </tr>
+      <table class="table my-0">
+        <thead>
+          <tr>
+            <th>Duration</th>
+            <th>Started</th>
+            <th>Finished</th>
+          </tr>
+        </thead>
+        <tbody id="lastPomodorosTable">
+          {
+            for(stat <- data) yield {
+              <tr>
+                <td>
+                  {displayStats(stat)}
+                </td>
+                <td>
+                  {epochToTimeString(stat.started)}
+                </td>
+                <td>
+                  {epochToTimeString(stat.finished)}
+                </td>
+              </tr>
+            }
           }
-        }
-      </tbody>
-    </table>
+        </tbody>
+      </table>
     </div>
+  }
+
+  private def epochToTimeString(millis: Double): String = {
+    def englishTime(value: Long, unit: String) =
+      value + " " + (if (value == 1) unit else unit + "s") + " ago"
+
+    val (h, m, s) = secondsToTime((Date.now() - millis).toLong / 1000)
+    if (h != 0) englishTime(h, "hour")
+    else if (m != 0) englishTime(m, "minute")
+    else englishTime(s, "second")
+  }
+
+  private def displayStats(pomodoroStats: PomodoroStats): String = {
+    val (h, m, s) =
+      secondsToTime(
+        (pomodoroStats.finished - pomodoroStats.started).toLong / 1000)
+    f"${if (h == 0) "" else h + "h "}$m%02dm $s%02ds"
   }
 }

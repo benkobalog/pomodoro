@@ -42,9 +42,9 @@ class WebSocketActor(userId: UUID,
       decode[UserRequest](message) match {
         case Left(e) =>
           println(s"Invalid ws message: {{$message}} exception: $e")
-        case Right(m) =>
+        case Right(msg) =>
           logic
-            .stateChanges(m, state)
+            .stateChanges(userId, msg, state)
             .foreach { newState =>
               state = newState
               eventBus.publish(EventBusMessage(userId, newState))

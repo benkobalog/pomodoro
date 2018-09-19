@@ -36,10 +36,10 @@ trait Tables {
     val finished =
       column[Option[Double]]("finished", O.Default(None))
     val kind = column[String]("kind")
-    val usersId = column[Option[java.util.UUID]]("users_id", O.Default(None))
+    val usersId = column[java.util.UUID]("users_id")
 
     lazy val usersFk = foreignKey("pomodoro_users_id_fkey", usersId, Users)(
-      r => Rep.Some(r.id),
+      r => r.id,
       onUpdate = ForeignKeyAction.NoAction,
       onDelete = ForeignKeyAction.NoAction)
   }

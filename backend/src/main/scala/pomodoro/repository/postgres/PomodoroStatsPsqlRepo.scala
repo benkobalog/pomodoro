@@ -3,7 +3,7 @@ package postgres
 
 import java.util.UUID
 
-import pomodoro.model.PomodoroStats
+import pomodoro.model.{Pomodoro, PomodoroStats}
 import slick.jdbc.JdbcBackend.DatabaseDef
 import slick.jdbc.PostgresProfile.api._
 
@@ -13,6 +13,12 @@ class PomodoroStatsPsqlRepo(db: DatabaseDef)(implicit ec: ExecutionContext)
     extends PomodoroStatsRepo {
 
   import dao.Tables.Pomodoros
+
+  def add(started: Double, finished: Double, userId: UUID): Future[Int] =
+    db.run(
+      Pomodoros.map(p => (p.started, p.finished, p.usersId, p.kind)) += (started, Some(
+        finished), userId, "pomodoro")
+    )
 
   override def getStats(usersId: UUID,
                         amount: Int = 5): Future[Seq[PomodoroStats]] = {

@@ -10,8 +10,6 @@ import org.scalajs.dom.document
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
-import com.softwaremill.macwire._
-
 case class JWTData(data: TokenData)
 
 @JSExportTopLevel("Main")
@@ -39,6 +37,7 @@ object Main {
         val wsClient = new WebSocketClient(jwtData.data)
         val ui = new PomodoroUI(user, wsClient)
 
+        println("Render Timer")
         dom.render(document.getElementById("timer"), ui.timerHtml())
       }
   }

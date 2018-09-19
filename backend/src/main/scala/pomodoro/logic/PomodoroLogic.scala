@@ -1,11 +1,15 @@
 package pomodoro.logic
 
+import java.util.UUID
+
 import pomodoro.model._
 import pomodoro.model.wsmessage._
+import pomodoro.repository.PomodoroStatsRepo
 
-trait PomodoroLogic {
+class PomodoroLogic(pomodoroStatsRepo: PomodoroStatsRepo) {
 
-  def stateChanges(message: UserRequest,
+  def stateChanges(userId: UUID,
+                   message: UserRequest,
                    state: PomodoroState): Option[PomodoroState] =
     (message, state) match {
       case (RequestInit, _) =>
@@ -14,10 +18,12 @@ trait PomodoroLogic {
       case (StartPomodoro, Idle) =>
         Running(currentTime).some
 
-      case (StartBreak(kind), Running(_)) =>
+      case (StartBreak(kind), Running(started)) =>
+        addPomodoro(started, userId)
         Break(kind, currentTime).some
 
-      case (EndPomodoro, Running(_)) =>
+      case (EndPomodoro, Running(started)) =>
+        addPomodoro(started, userId)
         Idle.some
 
       case (EndBreak, _: Break) =>
@@ -26,14 +32,13 @@ trait PomodoroLogic {
       case _ => None
     }
 
+  private def addPomodoro(started: Double, userId: UUID) =
+    pomodoroStatsRepo.add(started, System.currentTimeMillis().toDouble, userId)
+
   private def currentTime: Long =
     System.currentTimeMillis()
 
   private implicit class SomeOps[A](a: A) {
     def some: Option[A] = Some(a)
   }
-}
-
-object PomodoroLogic extends PomodoroLogic {
-  def apply: PomodoroLogic = new PomodoroLogic() {}
 }

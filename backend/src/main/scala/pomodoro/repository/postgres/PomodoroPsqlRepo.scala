@@ -14,7 +14,7 @@ class PomodoroPsqlRepo(db: DatabaseDef)(implicit ec: ExecutionContext)
   import dao.Tables.Pomodoros
 
   def start(usersId: UUID): Future[Int] = {
-    val insertQ = Pomodoros.map(_.usersId) += Some(usersId)
+    val insertQ = Pomodoros.map(_.usersId) += usersId
     db.run(insertQ)
   }
 

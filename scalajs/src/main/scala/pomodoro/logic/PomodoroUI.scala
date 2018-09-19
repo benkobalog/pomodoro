@@ -4,19 +4,67 @@ import com.thoughtworks.binding.Binding.{BindingSeq, Var}
 import com.thoughtworks.binding.{Binding, dom}
 import io.circe.parser.decode
 import io.circe.generic.auto._
+import org.scalajs.dom.Event
 import org.scalajs.dom.raw.Node
 import pomodoro.model._
-import pomodoro.model.wsmessage.{EndPomodoro, StartPomodoro}
+import pomodoro.model.wsmessage.{
+  EndBreak,
+  EndPomodoro,
+  StartBreak,
+  StartPomodoro
+}
 
 import scala.scalajs.js.timers.{SetIntervalHandle, clearInterval, setInterval}
 
 class PomodoroUI(user: User, wsClient: WebSocketClient) {
 
+  wsClient.setMessageHandler { e: org.scalajs.dom.MessageEvent =>
+    decode[PomodoroState](e.data.toString) match {
+      case Left(err) =>
+        println(s"Failed to decode message: ${e.data.toString} ::: $err")
+      case Right(ps) =>
+        println(s"Message: $ps")
+        updateState(ps)
+    }
+  }
+
+  case class ButtonProps(disabled: String,
+                         text: String,
+                         color: String,
+                         onClick: Event => Unit)
+
+  private val idleButtons = (
+    ButtonProps("",
+                "Start Pomodoro",
+                "btn-outline-success",
+                _ => wsClient.sendMessage(StartPomodoro)),
+    ButtonProps("d-none", "Stop", "btn-outline-danger", _ => ())
+  )
+
+  private val runningButtons = (
+    ButtonProps("",
+                "Start Break",
+                "btn-outline-warning",
+                _ => wsClient.sendMessage(StartBreak("break"))),
+    ButtonProps("",
+                "Stop Pomodoro",
+                "btn-outline-danger",
+                _ => wsClient.sendMessage(EndPomodoro))
+  )
+
+  private val breakButtons = (
+    ButtonProps("",
+                "Stop Break",
+                "btn-outline-warning",
+                _ => wsClient.sendMessage(EndBreak)),
+    ButtonProps("d-none", "Stop Pomodoro", "btn-outline-danger", _ => ())
+  )
+
   private val timeResolution = 1
-
-  var timer: Option[SetIntervalHandle] = None
-
-  var timerSeconds: Var[Int] = Var(user.pomodoroSeconds)
+  private var timer: Option[SetIntervalHandle] = None
+  private val timerSeconds: Var[Int] = Var(user.pomodoroSeconds)
+  private val stopButtonProps: Var[ButtonProps] = Var(idleButtons._1)
+  private val startButtonProps: Var[ButtonProps] = Var(idleButtons._2)
 
   private def createTimer(seconds: Int): Unit = {
     timer.foreach(clearInterval)
@@ -29,21 +77,6 @@ class PomodoroUI(user: User, wsClient: WebSocketClient) {
       }
       elapsedSeconds += timeResolution
     })
-  }
-
-  wsClient.setMessageHandler { e: org.scalajs.dom.MessageEvent =>
-    decode[PomodoroState](e.data.toString) match {
-      case Left(err) =>
-        println(s"Failed to decode message: ${e.data.toString} ::: $err")
-      case Right(ps) =>
-        println(s"Message: $ps")
-        updateState(ps)
-    }
-  }
-
-  private def toIdle(): Unit = {
-    timer.foreach(clearInterval)
-    timerSeconds.value = user.pomodoroSeconds
   }
 
   @dom def timerHtml(): Binding[BindingSeq[Node]] = {
@@ -61,21 +94,17 @@ class PomodoroUI(user: User, wsClient: WebSocketClient) {
       <div class="row">
         <div class="col">
           <button type="button"
-                  class="btn btn-outline-success btn-lg btn-block"
+                  class={"btn " + startButtonProps.bind.color + " btn-lg btn-block " + startButtonProps.bind.disabled}
                   id="start-button"
-                  onclick={ e: org.scalajs.dom.Event =>
-                    wsClient.sendMessage(StartPomodoro)
-                  }
-          >Start</button>
+                  onclick={startButtonProps.bind.onClick}
+          >{startButtonProps.bind.text}</button>
         </div>
         <div class="col">
           <button type="button"
-                  class="btn btn-outline-danger btn-lg btn-block"
+                  class={"btn " + stopButtonProps.bind.color + " btn-lg btn-block " + stopButtonProps.bind.disabled}
                   id="stop-button"
-                  onclick={ e: org.scalajs.dom.Event =>
-                    wsClient.sendMessage(EndPomodoro)
-                  }
-          >Stop</button>
+                  onclick={stopButtonProps.bind.onClick}
+          >{stopButtonProps.bind.text}</button>
         </div>
       </div>
   }
@@ -83,13 +112,22 @@ class PomodoroUI(user: User, wsClient: WebSocketClient) {
   private def updateState(pomodoroState: PomodoroState): Unit =
     pomodoroState match {
       case Idle =>
-        toIdle()
+        timer.foreach(clearInterval)
+        timerSeconds.value = user.pomodoroSeconds
+        startButtonProps.value = idleButtons._1
+        stopButtonProps.value = idleButtons._2
+
       case Break(kind, started) =>
         timerSeconds.value = user.breakSeconds
         createTimer(user.breakSeconds)
+        startButtonProps.value = breakButtons._1
+        stopButtonProps.value = breakButtons._2
+
       case Running(started) =>
         timerSeconds.value = user.pomodoroSeconds
         createTimer(user.pomodoroSeconds)
+        startButtonProps.value = runningButtons._1
+        stopButtonProps.value = runningButtons._2
     }
 
   private def secondsToTime(seconds: Long): String = {

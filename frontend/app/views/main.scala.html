@@ -31,11 +31,19 @@
             </nav>
 
             <div class="collapse" id="navbarToggleExternalContent">
-                @settings()
+                <!--<div id="settings">-->
+                    <!--<script type="text/javascript">-->
+                        <!--Main.renderSettings()-->
+                    <!--</script>-->
+                <!--</div>-->
             </div>
 
             @content
-
+            <div id="settings">
+                <script type="text/javascript">
+                    Main.renderSettings()
+                </script>
+            </div>
         </div>
     </body>
 </html>

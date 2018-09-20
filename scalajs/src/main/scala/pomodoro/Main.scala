@@ -3,9 +3,9 @@ package pomodoro
 import com.thoughtworks.binding.dom
 import io.circe.generic.auto._
 import io.circe.parser.decode
-import pomodoro.logic.{PomodoroStatistics, PomodoroUI, WebSocketClient}
-import pomodoro.model.{TokenData, User}
 import org.scalajs.dom.document
+import pomodoro.logic.{PomodoroStatistics, PomodoroUI, Settings, WebSocketClient}
+import pomodoro.model.TokenData
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
@@ -21,6 +21,8 @@ object Main {
   private val httpClient = HttpClient(jwtData.data)
   private val pomodoroStats = new PomodoroStatistics(httpClient)
 
+  private val settingsF = Settings(httpClient)
+
   def main(args: Array[String]): Unit = {
     pomodoroStats.getStats.onComplete(println)
   }
@@ -30,16 +32,23 @@ object Main {
     dom.render(document.getElementById("stats"), pomodoroStats.stats())
 
   @JSExport
-  def renderTimer(): Unit = {
-    httpClient
-      .get[User]("http://localhost:9001/user")
-      .foreach { user =>
-        val wsClient = new WebSocketClient(jwtData.data)
-        val ui = new PomodoroUI(user, wsClient, pomodoroStats)
+  def renderSettings(): Unit = {
+    println("Render Settings")
+    settingsF.foreach(
+      settings =>
+        dom.render(document.getElementById("settings"),
+                   settings.renderSettings()))
+  }
 
-        println("Render Timer")
-        dom.render(document.getElementById("timer"), ui.timerHtml())
-      }
+  @JSExport
+  def renderTimer(): Unit = {
+    settingsF.foreach { settings =>
+      val wsClient = new WebSocketClient(jwtData.data)
+      val ui = new PomodoroUI(settings.user.get, wsClient, pomodoroStats)
+
+      println("Render Timer")
+      dom.render(document.getElementById("timer"), ui.timerHtml())
+    }
   }
 
   private def parseJWT(str: String): String = {

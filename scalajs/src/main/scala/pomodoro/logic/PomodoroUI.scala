@@ -86,22 +86,24 @@ class PomodoroUI(user: User, wsClient: WebSocketClient, pStats: PomodoroStatisti
         </div>
       </div>
     </div>
-      <div class="row">
-        <div class="col">
-          <button type="button"
-                  class={"btn " + startButtonProps.bind.color + " btn-lg btn-block " + startButtonProps.bind.disabled}
-                  id="start-button"
-                  onclick={startButtonProps.bind.onClick}
-          >{startButtonProps.bind.text}</button>
-        </div>
-        <div class="col">
-          <button type="button"
-                  class={"btn " + stopButtonProps.bind.color + " btn-lg btn-block " + stopButtonProps.bind.disabled}
-                  id="stop-button"
-                  onclick={stopButtonProps.bind.onClick}
-          >{stopButtonProps.bind.text}</button>
-        </div>
+    <div class="row">
+      <div class="col">
+        <button
+          type="button"
+          class={"btn " + startButtonProps.bind.color + " btn-lg btn-block " + startButtonProps.bind.disabled}
+          id="start-button"
+          onclick={startButtonProps.bind.onClick}
+        >{startButtonProps.bind.text}</button>
       </div>
+      <div class="col">
+        <button
+          type="button"
+          class={"btn " + stopButtonProps.bind.color + " btn-lg btn-block " + stopButtonProps.bind.disabled}
+          id="stop-button"
+          onclick={stopButtonProps.bind.onClick}
+        >{stopButtonProps.bind.text}</button>
+      </div>
+    </div>
   }
 
   private def updateState(pomodoroState: PomodoroState): Unit =

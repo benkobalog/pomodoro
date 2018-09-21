@@ -11,7 +11,7 @@ import pomodoro.model.wsmessage._
 
 import scala.scalajs.js.timers.{SetIntervalHandle, clearInterval, setInterval}
 
-class PomodoroUI(user: User, wsClient: WebSocketClient, pStats: PomodoroStatistics) {
+class PomodoroUI(settings: Settings, wsClient: WebSocketClient, pStats: PomodoroStatistics) {
 
   wsClient.setMessageHandler { e: org.scalajs.dom.MessageEvent =>
     decode[PomodoroState](e.data.toString) match {
@@ -57,7 +57,7 @@ class PomodoroUI(user: User, wsClient: WebSocketClient, pStats: PomodoroStatisti
 
   private val timeResolution = 1
   private var timer: Option[SetIntervalHandle] = None
-  private val timerSeconds: Var[Int] = Var(user.pomodoroSeconds)
+  private val timerSeconds: Var[Int] = Var(settings.user.pomodoroSeconds)
   private val stopButtonProps: Var[ButtonProps] = Var(idleButtons._1)
   private val startButtonProps: Var[ButtonProps] = Var(idleButtons._2)
 
@@ -111,21 +111,21 @@ class PomodoroUI(user: User, wsClient: WebSocketClient, pStats: PomodoroStatisti
       case Idle =>
         pStats.getStats
         timer.foreach(clearInterval)
-        timerSeconds.value = user.pomodoroSeconds
+        timerSeconds.value = settings.user.pomodoroSeconds
         startButtonProps.value = idleButtons._1
         stopButtonProps.value = idleButtons._2
 
       case Break(kind, started) =>
         pStats.getStats
-        timerSeconds.value = user.breakSeconds
-        createTimer(user.breakSeconds)
+        timerSeconds.value = settings.user.breakSeconds
+        createTimer(settings.user.breakSeconds)
         startButtonProps.value = breakButtons._1
         stopButtonProps.value = breakButtons._2
 
       case Running(started) =>
         pStats.getStats
-        timerSeconds.value = user.pomodoroSeconds
-        createTimer(user.pomodoroSeconds)
+        timerSeconds.value = settings.user.pomodoroSeconds
+        createTimer(settings.user.pomodoroSeconds)
         startButtonProps.value = runningButtons._1
         stopButtonProps.value = runningButtons._2
     }

@@ -27,11 +27,11 @@ case class HttpClient(tokenData: TokenData) {
       .flatMap(x => Future.fromTry(x.toTry))
   }
 
-  def put[A](url: String)(a: A)(
-      implicit encoder: Encoder[A]): Future[Response[String]] =
+  def put[A](url: String)(a: A)(implicit encoder: Encoder[A]): Future[Response[String]] =
     sttp
       .put(uri"$url")
       .body(a.asJson.noSpaces)
+      .contentType("application/json")
       .auth
       .basic(tokenData.email, tokenData.token)
       .send()

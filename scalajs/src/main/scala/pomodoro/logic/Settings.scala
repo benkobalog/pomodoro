@@ -1,5 +1,6 @@
 package pomodoro.logic
 
+import com.softwaremill.sttp.Response
 import com.thoughtworks.binding.Binding.{BindingSeq, Var}
 import com.thoughtworks.binding.{Binding, dom}
 import io.circe.generic.auto._
@@ -11,9 +12,20 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
 
-  var user: Option[User] = None
+  // I use a private constructor, so this field should always have a value, when this class is used
+  var user: User = null
 
-  case class UserVar(ps: Var[String], bs: Var[String])
+  case class UserVar(ps: Var[String], bs: Var[String]) {
+    def toUser(user: User): User =
+      user
+        .copy(pomodoroSeconds = ps.value.toInt * 60)
+        .copy(breakSeconds = bs.value.toInt * 60)
+
+    def fromUser(user: User) = {
+      ps.value = (user.pomodoroSeconds / 60).toString
+      bs.value = (user.breakSeconds / 60).toString
+    }
+  }
 
   val userVar = UserVar(Var(""), Var(""))
 
@@ -21,14 +33,13 @@ class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
     httpClient
       .get[User]("http://localhost:9001/user")
       .map { userInDB =>
-        user = Some(userInDB)
-        userVar.ps.value = userInDB.pomodoroSeconds.toString
-        userVar.bs.value = userInDB.breakSeconds.toString
+        user = userInDB
+        userVar.fromUser(userInDB)
         userInDB
       }
 
-  def updateUser(newUser: User) = {
-    httpClient.put("http://localhost:9001/user")(user)
+  private def saveUser(): Future[Response[String]] = {
+      httpClient.put("http://localhost:9001/user")(user)
   }
 
   @dom def renderSettings(): Binding[BindingSeq[Node]] = {
@@ -40,18 +51,18 @@ class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
         type="button"
         class="btn btn-secondary"
         disabled={disabledSave.bind}
-        onclick={_: Any => println(userVar.ps.value)}>Save</button>
+        onclick={_: Any =>
+          user = userVar.toUser(user)
+          saveUser().foreach(_ => disabledSave.value = true)
+          println(s"Updating user settings: $user")
+        }>Save</button>
     }
 
     def changeHandler(toBind: Var[String]): Event => Unit = { event: Event =>
       event.currentTarget match {
         case input: HTMLInputElement =>
           toBind.value = input.value
-          user.foreach(
-            u =>
-              disabledSave.value =
-                u.pomodoroSeconds.toString == userVar.ps.value &&
-                  u.breakSeconds.toString == userVar.bs.value)
+          disabledSave.value = userVar.toUser(user) == user
       }
     }
 

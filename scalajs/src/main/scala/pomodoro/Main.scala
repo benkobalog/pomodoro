@@ -44,7 +44,7 @@ object Main {
   def renderTimer(): Unit = {
     settingsF.foreach { settings =>
       val wsClient = new WebSocketClient(jwtData.data)
-      val ui = new PomodoroUI(settings.user.get, wsClient, pomodoroStats)
+      val ui = new PomodoroUI(settings, wsClient, pomodoroStats)
 
       println("Render Timer")
       dom.render(document.getElementById("timer"), ui.timerHtml())

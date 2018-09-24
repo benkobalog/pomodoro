@@ -13,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
 
   // I use a private constructor, so this field should always have a value, when this class is used
-  var user: User = null
+  private var user: User = null
 
   case class UserVar(ps: Var[String], bs: Var[String]) {
     def toUser(user: User): User =
@@ -29,7 +29,9 @@ class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
 
   val userVar = UserVar(Var(""), Var(""))
 
-  def getUser(): Future[User] =
+  def getUser: User = user
+
+  private def fetchUserFromDB(): Future[User] =
     httpClient
       .get[User]("http://localhost:9001/user")
       .map { userInDB =>
@@ -41,6 +43,10 @@ class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
   private def saveUser(): Future[Response[String]] = {
       httpClient.put("http://localhost:9001/user")(user)
   }
+
+  var saveButtonEvent: Int => Unit = _
+
+  def setSaveButtonEvent(fn: Int => Unit): Unit = saveButtonEvent = fn
 
   @dom def renderSettings(): Binding[BindingSeq[Node]] = {
 
@@ -54,6 +60,7 @@ class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
         onclick={_: Any =>
           user = userVar.toUser(user)
           saveUser().foreach(_ => disabledSave.value = true)
+          saveButtonEvent(user.pomodoroSeconds)
           println(s"Updating user settings: $user")
         }>Save</button>
     }
@@ -150,6 +157,6 @@ object Settings {
   def apply(httpClient: HttpClient)(
       implicit ec: ExecutionContext): Future[Settings] = {
     val settings = new Settings(httpClient)
-    settings.getUser().map(_ => settings)
+    settings.fetchUserFromDB().map(_ => settings)
   }
 }

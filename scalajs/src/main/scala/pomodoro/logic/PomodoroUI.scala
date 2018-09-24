@@ -11,7 +11,9 @@ import pomodoro.model.wsmessage._
 
 import scala.scalajs.js.timers.{SetIntervalHandle, clearInterval, setInterval}
 
-class PomodoroUI(settings: Settings, wsClient: WebSocketClient, pStats: PomodoroStatistics) {
+class PomodoroUI(settings: Settings,
+                 wsClient: WebSocketClient,
+                 pStats: PomodoroStatistics) {
 
   wsClient.setMessageHandler { e: org.scalajs.dom.MessageEvent =>
     decode[PomodoroState](e.data.toString) match {
@@ -57,7 +59,7 @@ class PomodoroUI(settings: Settings, wsClient: WebSocketClient, pStats: Pomodoro
 
   private val timeResolution = 1
   private var timer: Option[SetIntervalHandle] = None
-  private val timerSeconds: Var[Int] = Var(settings.user.pomodoroSeconds)
+  private val timerSeconds: Var[Int] = Var(settings.getUser.pomodoroSeconds)
   private val stopButtonProps: Var[ButtonProps] = Var(idleButtons._1)
   private val startButtonProps: Var[ButtonProps] = Var(idleButtons._2)
 
@@ -106,29 +108,35 @@ class PomodoroUI(settings: Settings, wsClient: WebSocketClient, pStats: Pomodoro
     </div>
   }
 
-  private def updateState(pomodoroState: PomodoroState): Unit =
+  private def doNothing(a: Any): Unit = ()
+  private def updateTimerValue(seconds: Int): Unit =
+    timerSeconds.value = seconds
+
+  private def updateState(pomodoroState: PomodoroState): Unit = {
     pomodoroState match {
       case Idle =>
-        pStats.getStats
+        settings.setSaveButtonEvent(updateTimerValue)
         timer.foreach(clearInterval)
-        timerSeconds.value = settings.user.pomodoroSeconds
+        timerSeconds.value = settings.getUser.pomodoroSeconds
         startButtonProps.value = idleButtons._1
         stopButtonProps.value = idleButtons._2
 
       case Break(kind, started) =>
-        pStats.getStats
-        timerSeconds.value = settings.user.breakSeconds
-        createTimer(settings.user.breakSeconds)
+        settings.setSaveButtonEvent(doNothing)
+        timerSeconds.value = settings.getUser.breakSeconds
+        createTimer(settings.getUser.breakSeconds)
         startButtonProps.value = breakButtons._1
         stopButtonProps.value = breakButtons._2
 
       case Running(started) =>
-        pStats.getStats
-        timerSeconds.value = settings.user.pomodoroSeconds
-        createTimer(settings.user.pomodoroSeconds)
+        settings.setSaveButtonEvent(doNothing)
+        timerSeconds.value = settings.getUser.pomodoroSeconds
+        createTimer(settings.getUser.pomodoroSeconds)
         startButtonProps.value = runningButtons._1
         stopButtonProps.value = runningButtons._2
     }
+    pStats.getStats
+  }
 
   private def showTime(seconds: Long): String = {
     val (h, m, s) = secondsToTime(seconds)

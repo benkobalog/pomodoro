@@ -8,17 +8,16 @@ import pomodoro.repository.{PomodoroRepo, PomodoroStatsRepo}
 import scala.concurrent.Future
 
 class PomodoroRepoStub extends PomodoroRepo {
-  override def start(usersId: UUID): Future[Int] = {
+  override def start(usersId: UUID, kind: String, started: Double): Future[Int] = {
     Future.successful(1)
   }
 
-  override def finish(usersId: UUID, currentMillis: Long): Future[Int] = {
+  override def finish(usersId: UUID): Future[Int] = {
     Future.successful(1)
   }
 
-  override def getState(usersId: UUID): Future[PomodoroState] = {
+  override def getState(userId: UUID): Future[PomodoroState] =
     Future.successful(Idle)
-  }
 }
 
 class PomodoroStatsRepoStub extends PomodoroStatsRepo {

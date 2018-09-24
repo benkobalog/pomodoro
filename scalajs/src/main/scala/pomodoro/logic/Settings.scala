@@ -14,6 +14,7 @@ class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
 
   // I use a private constructor, so this field should always have a value, when this class is used
   private var user: User = null
+  def getUser: User = user
 
   case class UserVar(ps: Var[String], bs: Var[String]) {
     def toUser(user: User): User =
@@ -28,8 +29,6 @@ class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
   }
 
   val userVar = UserVar(Var(""), Var(""))
-
-  def getUser: User = user
 
   private def fetchUserFromDB(): Future[User] =
     httpClient
@@ -150,7 +149,6 @@ class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
     </div>
 
   }
-
 }
 
 object Settings {

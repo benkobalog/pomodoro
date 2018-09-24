@@ -4,9 +4,9 @@ import java.util.UUID
 
 import akka.actor.ActorRef
 import akka.event.{EventBus, LookupClassification}
-import pomodoro.model.PomodoroState
+import pomodoro.model.wsmessage.State
 
-final case class EventBusMessage(userId: UUID, payload: PomodoroState)
+final case class EventBusMessage(userId: UUID, payload: State)
 
 class ActorEventBus extends EventBus with LookupClassification {
   override type Event = EventBusMessage

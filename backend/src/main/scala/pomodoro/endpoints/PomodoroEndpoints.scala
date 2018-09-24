@@ -17,8 +17,8 @@ import pomodoro.logic.WebSocketActor.{
   WsHandleDropped
 }
 import pomodoro.logic.{ActorEventBus, PomodoroLogic, WebSocketActor}
+import pomodoro.model.wsmessage.{ClockSync, ControlMessage}
 import pomodoro.repository.PomodoroStatsRepo
-import pomodoro.repository.postgres.PomodoroStatsPsqlRepo
 import pomodoro.utils.implicits.AkkaHttpMarshaller._
 import pomodoro.utils.implicits.Circe._
 
@@ -67,10 +67,11 @@ class PomodoroEndpoints(pomodoroLogic: PomodoroLogic,
           // don't expose the wsHandle anymore
           NotUsed
         }
-        .keepAlive(maxIdle = 10.seconds,
-                   () =>
-                     TextMessage.Strict(
-                       "Keep-alive message sent to WebSocket recipient"))
+        .keepAlive(maxIdle = 10.seconds, () => {
+          val json =
+            (ClockSync(System.currentTimeMillis().toDouble): ControlMessage).asJson.noSpaces
+          TextMessage.Strict(json)
+        })
 
     Flow.fromSinkAndSource(sink, source)
   }

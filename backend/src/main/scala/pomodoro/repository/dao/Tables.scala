@@ -18,23 +18,15 @@ trait Tables {
   /** DDL for all tables. Call .create to execute. */
   lazy val schema: profile.SchemaDescription = Pomodoros.schema ++ Users.schema
 
+  // ==================== Pomodoro ====================
   class PomodoroTemplate(_tableTag: Tag)
       extends profile.api.Table[Pomodoro](_tableTag, "pomodoro") {
     def * =
       (id, started, finished, kind, usersId) <> (Pomodoro.tupled, Pomodoro.unapply)
-    def ? =
-      (Rep.Some(id), Rep.Some(started), finished, Rep.Some(kind), usersId).shaped
-        .<>({ r =>
-              import r._
-              _1.map(_ => Pomodoro.tupled((_1.get, _2.get, _3, _4.get, _5)))
-            },
-            (_: Any) =>
-              throw new Exception("Inserting into ? projection not supported."))
 
     val id = column[java.util.UUID]("id", O.PrimaryKey)
     val started = column[Double]("started")
-    val finished =
-      column[Option[Double]]("finished", O.Default(None))
+    val finished = column[Double]("finished")
     val kind = column[String]("kind")
     val usersId = column[java.util.UUID]("users_id")
 
@@ -45,6 +37,26 @@ trait Tables {
   }
   lazy val Pomodoros = new TableQuery(tag => new PomodoroTemplate(tag))
 
+  // ================= RunningPomodoro =================
+  class RunningPomodoroTemplate(_tableTag: Tag)
+    extends profile.api.Table[RunningPomodoro](_tableTag, "running_pomodoro") {
+    def * =
+      (id, started, kind, usersId) <> (RunningPomodoro.tupled, RunningPomodoro.unapply)
+
+    val id = column[java.util.UUID]("id", O.PrimaryKey)
+    val started = column[Double]("started")
+    val kind = column[String]("kind")
+    val usersId = column[java.util.UUID]("users_id")
+
+    lazy val usersFk = foreignKey("running_pomodoro_users_id_fkey", usersId, Users)(
+      r => r.id,
+      onUpdate = ForeignKeyAction.NoAction,
+      onDelete = ForeignKeyAction.NoAction)
+  }
+  lazy val RunningPomodoros = new TableQuery(tag => new RunningPomodoroTemplate(tag))
+
+
+  // ====================== User ======================
   class UserTemplate(_tableTag: Tag)
       extends profile.api.Table[User](_tableTag, "users") {
     def * =
@@ -71,6 +83,7 @@ trait Tables {
   }
   lazy val Users = new TableQuery(tag => new UserTemplate(tag))
 
+  // ================ GeneratedPassword ================
   class GeneratedPasswordTemplate(_tableTag: Tag)
       extends profile.api.Table[GeneratedPassword](_tableTag,
                                                    "generated_password") {
@@ -91,6 +104,8 @@ trait Tables {
   lazy val GeneratedPasswords = new TableQuery(
     tag => new GeneratedPasswordTemplate(tag))
 
+
+  // =================== OauthToken ===================
   class OAuthTokenTemplate(_tableTag: Tag)
       extends profile.api.Table[OAuthToken](_tableTag, "oauth_token") {
     override def * : ProvenShape[OAuthToken] =

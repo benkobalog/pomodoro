@@ -7,9 +7,9 @@ import pomodoro.model.PomodoroState
 import scala.concurrent.Future
 
 trait PomodoroRepo {
-  def start(usersId: UUID): Future[Int]
+  def start(usersId: UUID, kind: String, started: Double): Future[Int]
 
-  def finish(usersId: UUID, currentMillis: Long): Future[Int]
+  def finish(usersId: UUID): Future[Int]
 
-  def getState(usersId: UUID): Future[PomodoroState]
+  def getState(userId: UUID): Future[PomodoroState]
 }

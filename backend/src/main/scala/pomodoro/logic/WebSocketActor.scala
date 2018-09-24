@@ -7,8 +7,10 @@ import pomodoro.model._
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.syntax._
-import pomodoro.model.wsmessage.UserRequest
+import pomodoro.model.wsmessage.{ControlMessage, State, UserRequest}
 import pomodoro.utils.implicits.Circe._
+
+import scala.util.{Failure, Success}
 
 class WebSocketActor(userId: UUID,
                      eventBus: ActorEventBus,
@@ -18,9 +20,16 @@ class WebSocketActor(userId: UUID,
   private var wsHandle: Option[ActorRef] = None
   private var state: PomodoroState = _
 
+  import context.dispatcher
+
   override def preStart(): Unit = {
     eventBus.subscribe(self, userId)
-    state = Idle
+    logic.getState(userId).onComplete {
+      case Success(dbState) => state = dbState
+      case Failure(e) =>
+        state = Idle
+        println(e)
+    }
   }
 
   override def receive: Receive = {
@@ -44,20 +53,28 @@ class WebSocketActor(userId: UUID,
           println(s"Invalid ws message: {{$message}} exception: $e")
         case Right(msg) =>
           logic
-            .stateChanges(userId, msg, state)
-            .foreach { newState =>
-              state = newState
-              eventBus.publish(EventBusMessage(userId, newState))
+            .stateChanges(userId, msg, state) match {
+              case BroadCast(newState) =>
+                state = newState
+                eventBus.publish(EventBusMessage(userId, State(newState)))
+
+              case Self(newState) =>
+                state = newState
+                replyToUser(State(newState))
+
+              case NoMessage =>
             }
       }
 
-    case cr: PomodoroState =>
-      println("Got a message from the eventbus: " + cr)
-      replyToUser(cr)
+    case s: State =>
+      println("Got a message from the eventbus: " + s)
+      replyToUser(s)
   }
 
-  private def replyToUser(pomodoroState: PomodoroState): Unit =
-    wsHandle.foreach(_ ! pomodoroState.asJson.noSpaces)
+  private def replyToUser(cm: ControlMessage): Unit = {
+    val json = cm.asJson.noSpaces
+    wsHandle.foreach(_ ! json)
+  }
 }
 
 object WebSocketActor {

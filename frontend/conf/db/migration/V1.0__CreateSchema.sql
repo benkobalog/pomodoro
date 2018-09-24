@@ -20,11 +20,18 @@ CREATE TABLE oauth_token (
   token VARCHAR(191) NOT NULL
 );
 
+CREATE TABLE running_pomodoro (
+ id uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+ started DOUBLE PRECISION NOT NULL,
+ kind VARCHAR(16) NOT NULL DEFAULT 'pomodoro',
+ users_id uuid REFERENCES users(id)
+);
+
 CREATE TABLE pomodoro (
  id uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
  started DOUBLE PRECISION NOT NULL,
- finished DOUBLE PRECISION,
- kind VARCHAR(16) NOT NULL DEFAULT 'pomodoro',
+ finished DOUBLE PRECISION NOT NULL,
+ kind VARCHAR(16) NOT NULL,
  users_id uuid REFERENCES users(id)
 );
 

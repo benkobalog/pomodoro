@@ -11,45 +11,45 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class PomodoroPsqlRepo(db: DatabaseDef)(implicit ec: ExecutionContext)
     extends PomodoroRepo {
+  import dao.Tables.RunningPomodoros
   import dao.Tables.Pomodoros
 
-  def start(usersId: UUID): Future[Int] = {
-    val insertQ = Pomodoros.map(_.usersId) += usersId
-    db.run(insertQ)
+  override def start(usersId: UUID,
+                     kind: String,
+                     started: Double): Future[Int] = {
+    val insertQ = RunningPomodoros.map(x => (x.usersId, x.kind, x.started)) += (usersId, kind, started)
+    db.run(insertQ).recover { case t => println("MMMMMMMMMM " + t.toString); 0 }
   }
 
-  private val current_timestamp =
-    SimpleLiteral[java.sql.Timestamp]("CURRENT_TIMESTAMP")
-
-  def finish(usersId: UUID,
-             currentMillis: Long = System.currentTimeMillis()): Future[Int] = {
-    db.run(for {
-      nrUpdated <- Pomodoros
-        .filter(_.usersId === usersId)
-        .filter(_.finished.isEmpty)
-        .map(_.finished)
-        .update(Some(currentMillis))
-    } yield nrUpdated)
+  override def finish(userId: UUID): Future[Int] = {
+    db.run {
+        val query = RunningPomodoros.filter(_.usersId === userId)
+        for {
+          pomodoro <- query.result.headOption
+          _ <- query.delete
+        } yield pomodoro
+      }
+      .flatMap {
+        case None => Future.failed(new Exception("No Running pomodoro"))
+        case Some(runningPom) =>
+          db.run(
+            Pomodoros +=
+              runningPom.toPomodoro(System.currentTimeMillis().toDouble))
+      }
   }
 
-  def getState(usersId: UUID): Future[PomodoroState] = {
+  override def getState(userId: UUID): Future[PomodoroState] = {
     db.run(
-      for {
-        ts <- current_timestamp.result
-        result <- Pomodoros
-          .filter(_.usersId === usersId)
-          .filter(_.finished.isEmpty)
-          .map(r => (r.started, ts, r.kind))
-          .result
-          .headOption
-          .map {
-            case None => Idle
-            case Some((started, current, "pomodoro")) =>
-              Running(started)
-            case Some((started, current, kind)) =>
-              Break(kind, started)
-          }
-      } yield result
+      RunningPomodoros.filter(_.usersId === userId).result.headOption.map {
+        case Some(pomodoro) =>
+          println(s"========= $pomodoro ]]]]]]")
+          if (pomodoro.kind == "pomodoro") Running(pomodoro.started)
+          else Break(pomodoro.kind, pomodoro.started)
+        case None =>
+          println("NONee????????????")
+
+          Idle
+      }
     )
   }
 }

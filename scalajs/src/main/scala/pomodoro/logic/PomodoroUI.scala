@@ -9,17 +9,26 @@ import org.scalajs.dom.raw.Node
 import pomodoro.model._
 import pomodoro.model.wsmessage._
 
+import scala.scalajs.js.Date
 import scala.scalajs.js.timers.{SetIntervalHandle, clearInterval, setInterval}
 
 class PomodoroUI(settings: Settings,
                  wsClient: WebSocketClient,
                  pStats: PomodoroStatistics) {
 
+  private var clockOffset: Double = 0
+  private def currentClientTime: Double = Date.now()
+
+  private def syncTime(): Double = Date.now() + clockOffset
+
   wsClient.setMessageHandler { e: org.scalajs.dom.MessageEvent =>
-    decode[PomodoroState](e.data.toString) match {
+    decode[ControlMessage](e.data.toString) match {
       case Left(err) =>
         println(s"""Failed to decode message: "${e.data.toString}" ::: $err""")
-      case Right(ps) =>
+      case Right(ClockSync(serverTime)) =>
+        clockOffset = currentClientTime - serverTime
+        println(s"Offset set to: $clockOffset")
+      case Right(State(ps)) =>
         println(s"Message: $ps")
         updateState(ps)
     }
@@ -123,15 +132,25 @@ class PomodoroUI(settings: Settings,
 
       case Break(kind, started) =>
         settings.setSaveButtonEvent(doNothing)
-        timerSeconds.value = settings.getUser.breakSeconds
-        createTimer(settings.getUser.breakSeconds)
+        val secondsLeft =
+          (settings.getUser.breakSeconds - (syncTime - started) / 1000).toInt
+        timerSeconds.value = secondsLeft
+        createTimer(secondsLeft)
         startButtonProps.value = breakButtons._1
         stopButtonProps.value = breakButtons._2
 
       case Running(started) =>
         settings.setSaveButtonEvent(doNothing)
-        timerSeconds.value = settings.getUser.pomodoroSeconds
-        createTimer(settings.getUser.pomodoroSeconds)
+        val secondsLeft =
+        (settings.getUser.pomodoroSeconds - (syncTime - started) / 1000).toInt
+        println("=======")
+        println(syncTime())
+        println(started)
+        println(syncTime() - started)
+        println(secondsLeft)
+        println("=======")
+        timerSeconds.value = secondsLeft
+        createTimer(secondsLeft)
         startButtonProps.value = runningButtons._1
         stopButtonProps.value = runningButtons._2
     }

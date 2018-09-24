@@ -14,22 +14,15 @@ class PomodoroStatsPsqlRepo(db: DatabaseDef)(implicit ec: ExecutionContext)
 
   import dao.Tables.Pomodoros
 
-  def add(started: Double, finished: Double, userId: UUID): Future[Int] =
-    db.run(
-      Pomodoros.map(p => (p.started, p.finished, p.usersId, p.kind)) += (started, Some(
-        finished), userId, "pomodoro")
-    )
-
   override def getStats(usersId: UUID,
                         amount: Int = 5): Future[Seq[PomodoroStats]] = {
     db.run(
       Pomodoros
         .filter(_.usersId === usersId)
-        .filter(_.finished.nonEmpty)
         .filter(_.kind === "pomodoro")
         .sortBy(_.finished.desc)
         .take(amount)
-        .map(row => (row.started, row.finished.get))
+        .map(row => (row.started, row.finished))
         .result
         .map(_.map(x => PomodoroStats(x._1, x._2)))
     )

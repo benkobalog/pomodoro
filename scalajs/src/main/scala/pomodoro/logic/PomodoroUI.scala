@@ -78,10 +78,10 @@ class PomodoroUI(settings: Settings,
     var elapsedSeconds = 0
     timer = Some(setInterval(timeResolution * 1000) {
       timerSeconds.value -= timeResolution
+      elapsedSeconds += timeResolution
       if (elapsedSeconds >= seconds) {
         timer.foreach(clearInterval)
       }
-      elapsedSeconds += timeResolution
     })
   }
 
@@ -142,13 +142,7 @@ class PomodoroUI(settings: Settings,
       case Running(started) =>
         settings.setSaveButtonEvent(doNothing)
         val secondsLeft =
-        (settings.getUser.pomodoroSeconds - (syncTime - started) / 1000).toInt
-        println("=======")
-        println(syncTime())
-        println(started)
-        println(syncTime() - started)
-        println(secondsLeft)
-        println("=======")
+          (settings.getUser.pomodoroSeconds - (syncTime - started) / 1000).toInt
         timerSeconds.value = secondsLeft
         createTimer(secondsLeft)
         startButtonProps.value = runningButtons._1

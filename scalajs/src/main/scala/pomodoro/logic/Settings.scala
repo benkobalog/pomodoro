@@ -22,7 +22,7 @@ class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
         .copy(pomodoroSeconds = ps.value.toInt * 60)
         .copy(breakSeconds = bs.value.toInt * 60)
 
-    def fromUser(user: User) = {
+    def fromUser(user: User): Unit = {
       ps.value = (user.pomodoroSeconds / 60).toString
       bs.value = (user.breakSeconds / 60).toString
     }

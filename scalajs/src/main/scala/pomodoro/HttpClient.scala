@@ -22,7 +22,7 @@ case class HttpClient(tokenData: TokenData) {
       .map(response =>
         for {
           string <- response.body.left.map(new Exception(_))
-          result <- decode[A](string)
+          result <- decode[A](string).left.map(x => new Exception("Message: " + string + " " + x.getMessage))
         } yield result)
       .flatMap(x => Future.fromTry(x.toTry))
   }

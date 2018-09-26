@@ -39,7 +39,7 @@ trait Tables {
 
   // ================= RunningPomodoro =================
   class RunningPomodoroTemplate(_tableTag: Tag)
-    extends profile.api.Table[RunningPomodoro](_tableTag, "running_pomodoro") {
+      extends profile.api.Table[RunningPomodoro](_tableTag, "running_pomodoro") {
     def * =
       (id, started, kind, usersId) <> (RunningPomodoro.tupled, RunningPomodoro.unapply)
 
@@ -48,37 +48,43 @@ trait Tables {
     val kind = column[String]("kind")
     val usersId = column[java.util.UUID]("users_id")
 
-    lazy val usersFk = foreignKey("running_pomodoro_users_id_fkey", usersId, Users)(
-      r => r.id,
-      onUpdate = ForeignKeyAction.NoAction,
-      onDelete = ForeignKeyAction.NoAction)
+    lazy val usersFk =
+      foreignKey("running_pomodoro_users_id_fkey", usersId, Users)(
+        r => r.id,
+        onUpdate = ForeignKeyAction.NoAction,
+        onDelete = ForeignKeyAction.NoAction)
   }
-  lazy val RunningPomodoros = new TableQuery(tag => new RunningPomodoroTemplate(tag))
-
+  lazy val RunningPomodoros = new TableQuery(
+    tag => new RunningPomodoroTemplate(tag))
 
   // ====================== User ======================
   class UserTemplate(_tableTag: Tag)
       extends profile.api.Table[User](_tableTag, "users") {
     def * =
-      (id, email, createdAt, pomodoroSeconds, breakSeconds) <> (User.tupled, User.unapply)
+      (id, email, createdAt, pomodoroSeconds, breakSeconds, autoStartBreak) <> (User.tupled, User.unapply)
     def ? =
       (Rep.Some(id),
        Rep.Some(email),
        Rep.Some(createdAt),
        Rep.Some(pomodoroSeconds),
-       Rep.Some(breakSeconds)).shaped
-        .<>({ r =>
-              import r._
-              _1.map(_ => User.tupled((_1.get, _2.get, _3.get, _4.get, _5.get)))
-            },
-            (_: Any) =>
-              throw new Exception("Inserting into ? projection not supported."))
+       Rep.Some(breakSeconds),
+       Rep.Some(autoStartBreak)).shaped
+        .<>(
+          { r =>
+            import r._
+            _1.map(_ =>
+              User.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get)))
+          },
+          (_: Any) =>
+            throw new Exception("Inserting into ? projection not supported.")
+        )
 
     val id = column[java.util.UUID]("id", O.PrimaryKey)
     val email = column[String]("email", O.Length(191, varying = true))
     val createdAt = column[Double]("created_at")
     val pomodoroSeconds = column[Int]("pomodoro_seconds")
     val breakSeconds = column[Int]("break_seconds")
+    val autoStartBreak = column[Boolean]("auto_start_break")
     val index1 = index("users_email_key", email, unique = true)
   }
   lazy val Users = new TableQuery(tag => new UserTemplate(tag))
@@ -103,7 +109,6 @@ trait Tables {
 
   lazy val GeneratedPasswords = new TableQuery(
     tag => new GeneratedPasswordTemplate(tag))
-
 
   // =================== OauthToken ===================
   class OAuthTokenTemplate(_tableTag: Tag)

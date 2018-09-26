@@ -5,11 +5,14 @@ import com.thoughtworks.binding.{Binding, dom}
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import org.scalajs.dom.Event
-import org.scalajs.dom.raw.Node
+import org.scalajs.dom.document
+import org.scalajs.dom.raw.{HTMLAudioElement, HTMLMediaElement, Node}
 import pomodoro.model._
 import pomodoro.model.wsmessage._
 
+import scala.scalajs.js
 import scala.scalajs.js.Date
+import scala.scalajs.js.annotation.JSGlobal
 import scala.scalajs.js.timers.{SetIntervalHandle, clearInterval, setInterval}
 
 class PomodoroUI(settings: Settings,
@@ -18,28 +21,33 @@ class PomodoroUI(settings: Settings,
 
   private var clockOffset: Double = 0
   private def currentClientTime: Double = Date.now()
-
   private def syncTime(): Double = Date.now() + clockOffset
 
   wsClient.setMessageHandler { e: org.scalajs.dom.MessageEvent =>
     decode[ControlMessage](e.data.toString) match {
       case Left(err) =>
         println(s"""Failed to decode message: "${e.data.toString}" ::: $err""")
+
       case Right(ClockSync(serverTime)) =>
         clockOffset = currentClientTime - serverTime
         println(s"Offset set to: $clockOffset")
+
       case Right(State(ps)) =>
         println(s"Message: $ps")
         updateState(ps)
     }
   }
 
+  val sound = document.getElementById("audio").asInstanceOf[HTMLAudioElement]
+
   case class ButtonProps(disabled: String,
                          text: String,
                          color: String,
                          onClick: Event => Unit)
 
-  private val idleButtons = (
+  case class Controls(left: ButtonProps, right: ButtonProps)
+
+  private val idleButtons = Controls(
     ButtonProps("",
                 "Start Pomodoro",
                 "btn-outline-success",
@@ -47,7 +55,7 @@ class PomodoroUI(settings: Settings,
     ButtonProps("d-none", "Stop", "btn-outline-danger", _ => ())
   )
 
-  private val runningButtons = (
+  private val runningButtons = Controls(
     ButtonProps("",
                 "Start Break",
                 "btn-outline-warning",
@@ -58,7 +66,7 @@ class PomodoroUI(settings: Settings,
                 _ => wsClient.sendMessage(EndPomodoro))
   )
 
-  private val breakButtons = (
+  private val breakButtons = Controls(
     ButtonProps("",
                 "Stop Break",
                 "btn-outline-warning",
@@ -69,8 +77,8 @@ class PomodoroUI(settings: Settings,
   private val timeResolution = 1
   private var timer: Option[SetIntervalHandle] = None
   private val timerSeconds: Var[Int] = Var(settings.getUser.pomodoroSeconds)
-  private val stopButtonProps: Var[ButtonProps] = Var(idleButtons._1)
-  private val startButtonProps: Var[ButtonProps] = Var(idleButtons._2)
+  private val stopButtonProps: Var[ButtonProps] = Var(idleButtons.left)
+  private val startButtonProps: Var[ButtonProps] = Var(idleButtons.right)
 
   private def createTimer(seconds: Int): Unit = {
     timer.foreach(clearInterval)
@@ -81,6 +89,7 @@ class PomodoroUI(settings: Settings,
       elapsedSeconds += timeResolution
       if (elapsedSeconds >= seconds) {
         timer.foreach(clearInterval)
+        sound.play()
       }
     })
   }
@@ -127,8 +136,8 @@ class PomodoroUI(settings: Settings,
         settings.setSaveButtonEvent(updateTimerValue)
         timer.foreach(clearInterval)
         timerSeconds.value = settings.getUser.pomodoroSeconds
-        startButtonProps.value = idleButtons._1
-        stopButtonProps.value = idleButtons._2
+        startButtonProps.value = idleButtons.left
+        stopButtonProps.value = idleButtons.right
 
       case Break(kind, started) =>
         settings.setSaveButtonEvent(doNothing)
@@ -136,8 +145,8 @@ class PomodoroUI(settings: Settings,
           (settings.getUser.breakSeconds - (syncTime - started) / 1000).toInt
         timerSeconds.value = secondsLeft
         createTimer(secondsLeft)
-        startButtonProps.value = breakButtons._1
-        stopButtonProps.value = breakButtons._2
+        startButtonProps.value = breakButtons.left
+        stopButtonProps.value = breakButtons.right
 
       case Running(started) =>
         settings.setSaveButtonEvent(doNothing)
@@ -145,8 +154,8 @@ class PomodoroUI(settings: Settings,
           (settings.getUser.pomodoroSeconds - (syncTime - started) / 1000).toInt
         timerSeconds.value = secondsLeft
         createTimer(secondsLeft)
-        startButtonProps.value = runningButtons._1
-        stopButtonProps.value = runningButtons._2
+        startButtonProps.value = runningButtons.left
+        stopButtonProps.value = runningButtons.right
     }
     pStats.getStats
   }

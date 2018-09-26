@@ -4,7 +4,8 @@ import com.softwaremill.sttp.Response
 import com.thoughtworks.binding.Binding.{BindingSeq, Var}
 import com.thoughtworks.binding.{Binding, dom}
 import io.circe.generic.auto._
-import org.scalajs.dom.raw.{Event, HTMLInputElement, Node}
+import org.scalajs.dom.raw._
+import org.scalajs.dom.document
 import pomodoro.HttpClient
 import pomodoro.model.User
 
@@ -16,19 +17,25 @@ class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
   private var user: User = null
   def getUser: User = user
 
-  case class UserVar(ps: Var[String], bs: Var[String]) {
+  case class UserVar(ps: Var[String], bs: Var[String], autoStartBreak: Var[Boolean]) {
     def toUser(user: User): User =
       user
         .copy(pomodoroSeconds = ps.value.toInt * 60)
         .copy(breakSeconds = bs.value.toInt * 60)
+        .copy(autoStartBreak = autoStartBreak.value)
 
     def fromUser(user: User): Unit = {
       ps.value = (user.pomodoroSeconds / 60).toString
       bs.value = (user.breakSeconds / 60).toString
+      autoStartBreak.value = user.autoStartBreak
+      toggleAutoStart._1.value = if(user.autoStartBreak) "active" else ""
+      toggleAutoStart._2.value = if(user.autoStartBreak) "" else "active"
     }
   }
 
-  val userVar = UserVar(Var(""), Var(""))
+  val userVar = UserVar(Var(""), Var(""), Var(true))
+
+  val toggleAutoStart = (Var("active"), Var(""))
 
   private def fetchUserFromDB(): Future[User] =
     httpClient
@@ -40,7 +47,7 @@ class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
       }
 
   private def saveUser(): Future[Response[String]] = {
-      httpClient.put("http://localhost:9001/user")(user)
+    httpClient.put("http://localhost:9001/user")(user)
   }
 
   var saveButtonEvent: Int => Unit = _
@@ -64,11 +71,18 @@ class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
         }>Save</button>
     }
 
-    def changeHandler(toBind: Var[String]): Event => Unit = { event: Event =>
+    def changeHandler(toBind: Var[String]): Event => Unit = { event =>
       event.currentTarget match {
         case input: HTMLInputElement =>
           toBind.value = input.value
           disabledSave.value = userVar.toUser(user) == user
+      }
+    }
+
+    def onChangeRadio(fn: => Unit)(e: Event): Unit = {
+      e.target match {
+        case input: HTMLInputElement =>
+          fn
       }
     }
 
@@ -107,12 +121,13 @@ class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
         <span class="input-group-text bg-secondary text-light">Starting break</span>
       </div>
       <div class="btn-group btn-group-toggle" data:data-toggle="buttons">
-        <label class="btn btn-light active">
-          <input type="radio" name="options" id="break-auto-option" autocomplete="off" data:checked=""/>Automatically
-        </label>
-        <label class="btn btn-light">
-          <input type="radio" name="options" id="break-manual-option" autocomplete="off" data:checked="checked"/>Manually
-        </label>
+        <label class={"btn btn-light " + toggleAutoStart._1.bind} id="autoOpt"
+               onchange={onChangeRadio(userVar.autoStartBreak.value = true)(_)} >
+          <input type="radio" name="autoStartBreak" autocomplete="off" />Automatically</label>
+
+        <label class={"btn btn-light " + toggleAutoStart._2.bind} id="manualOpt"
+               onchange={onChangeRadio(userVar.autoStartBreak.value = false)(_)}>
+          <input type="radio" name="autoStartBreak" autocomplete="off" />Manually</label>
       </div>
     </div>
 
@@ -122,9 +137,6 @@ class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
       </div>
 
     <div class="btn-group btn-group-toggle" data:data-toggle="buttons">
-      <label class="btn btn-light active">
-        <input type="radio" name="options" id="timeup-stop-option" autocomplete="off"/>Stop timer
-      </label>
       <label class="btn btn-light">
         <input type="radio" name="options" id="timeup-continue-option" autocomplete="off"/>Warn each
       </label>

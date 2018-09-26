@@ -9,7 +9,7 @@ import akka.stream.testkit.{TestPublisher, TestSubscriber}
 import io.circe.generic.auto._
 import io.circe.syntax._
 import org.scalatest._
-import pomodoro.model.{Idle, PomodoroState}
+import pomodoro.model.{Break, Idle, PomodoroState}
 import pomodoro.model.wsmessage._
 import pomodoro.utils.implicits.Circe._
 
@@ -24,7 +24,7 @@ class WebSocketStreamSpec
 
     sub.request(1)
     pub.sendNext(StartPomodoro)
-    sub.expectNext(Idle)
+    sub.expectNext(State(Idle))
 
     pub.sendComplete()
   }
@@ -42,15 +42,15 @@ class WebSocketStreamSpec
     sub2.request(1)
 
     pub1.sendNext(StartPomodoro)
-    sub1.expectNext(Idle)
-    sub2.expectNext(Idle)
+    sub1.expectNext(State(Idle))
+    sub2.expectNext(State(Idle))
 
     sub1.request(1)
     sub2.request(1)
 
     pub2.sendNext(StartBreak("long break"))
-    sub1.expectNext(Idle)
-    sub2.expectNext(Idle)
+    sub1.expectNext(State(Idle))
+    sub2.expectNext(State(Idle))
 
     pub1.sendComplete()
     pub2.sendComplete()
@@ -68,6 +68,6 @@ class WebSocketStreamSpec
   private implicit def urToMessage(ur: UserRequest): Message =
     TextMessage.Strict(ur.asJson.noSpaces)
 
-  private implicit def urToMessage(ps: PomodoroState): Message =
+  private implicit def urToMessage(ps: ControlMessage): Message =
     TextMessage.Strict(ps.asJson.noSpaces)
 }

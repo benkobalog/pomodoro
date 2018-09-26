@@ -34,42 +34,54 @@ class WebSocketActor(userId: UUID,
 
   override def receive: Receive = {
     case c: Connection =>
-      c match {
-        // `actorRef` is a handle to communicate back to the WebSocket user
-        case ConnectWsHandle(actorRef) =>
-          println(s"New client connected with userId $userId")
-          wsHandle = Some(actorRef)
-
-        case WsHandleDropped =>
-          println(
-            "Downstream WebSocket has been disconnected, stopping " + userId)
-          eventBus.unsubscribe(self)
-      }
+      handleConnection(c)
 
     case UserAction(message) =>
-      println("Got a UserAction")
-      decode[UserRequest](message) match {
-        case Left(e) =>
-          println(s"Invalid ws message: {{$message}} exception: $e")
-        case Right(msg) =>
-          logic
-            .stateChanges(userId, msg, state) match {
-              case BroadCast(newState) =>
-                state = newState
-                eventBus.publish(EventBusMessage(userId, State(newState)))
-
-              case Self(newState) =>
-                state = newState
-                replyToUser(State(newState))
-                replyToUser(ClockSync(System.currentTimeMillis().toDouble))
-
-              case NoMessage =>
-            }
-      }
+      handleUserAction(message)
 
     case s: State =>
-      println("Got a message from the eventbus: " + s)
-      replyToUser(s)
+      handleEventBusMessage(s)
+  }
+
+  private def handleEventBusMessage(s: State): Unit = {
+    println("Got a message from the eventbus: " + s)
+    replyToUser(s)
+  }
+
+  private def handleUserAction(message: String): Unit = {
+    println("Got a UserAction")
+    decode[UserRequest](message) match {
+      case Left(e) =>
+        println(s"Invalid ws message: {{$message}} exception: $e")
+      case Right(msg) =>
+        logic
+          .stateChanges(userId, msg, state) match {
+          case BroadCast(newState) =>
+            state = newState
+            eventBus.publish(EventBusMessage(userId, State(newState)))
+
+          case Self(newState) =>
+            state = newState
+            replyToUser(State(newState))
+            replyToUser(ClockSync(System.currentTimeMillis().toDouble))
+
+          case NoMessage =>
+        }
+    }
+  }
+
+  private def handleConnection(c: Connection): Unit = {
+    c match {
+      // `actorRef` is a handle to communicate back to the WebSocket user
+      case ConnectWsHandle(actorRef) =>
+        println(s"New client connected with userId $userId")
+        wsHandle = Some(actorRef)
+
+      case WsHandleDropped =>
+        println(
+          "Downstream WebSocket has been disconnected, stopping " + userId)
+        eventBus.unsubscribe(self)
+    }
   }
 
   private def replyToUser(cm: ControlMessage): Unit = {

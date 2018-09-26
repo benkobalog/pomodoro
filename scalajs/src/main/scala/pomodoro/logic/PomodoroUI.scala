@@ -4,15 +4,12 @@ import com.thoughtworks.binding.Binding.{BindingSeq, Var}
 import com.thoughtworks.binding.{Binding, dom}
 import io.circe.generic.auto._
 import io.circe.parser.decode
-import org.scalajs.dom.Event
-import org.scalajs.dom.document
-import org.scalajs.dom.raw.{HTMLAudioElement, HTMLMediaElement, Node}
+import org.scalajs.dom.{Event, document}
+import org.scalajs.dom.raw.{HTMLAudioElement, Node}
 import pomodoro.model._
 import pomodoro.model.wsmessage._
 
-import scala.scalajs.js
 import scala.scalajs.js.Date
-import scala.scalajs.js.annotation.JSGlobal
 import scala.scalajs.js.timers.{SetIntervalHandle, clearInterval, setInterval}
 
 class PomodoroUI(settings: Settings,

@@ -37,8 +37,10 @@ CREATE TABLE pomodoro (
 );
 
 
-INSERT INTO users (email)
-VALUES ('dev@mail.com'), ('dev2@mail.com');
+INSERT INTO users (email, pomodoro_seconds, break_seconds)
+VALUES
+ ('dev@mail.com', 5, 15),
+ ('dev2@mail.com', 25*60, 5*60);
 
 INSERT INTO generated_password (users_id, password)
 VALUES

@@ -7,7 +7,7 @@ import pomodoro.model._
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.syntax._
-import pomodoro.model.wsmessage.{ControlMessage, State, UserRequest}
+import pomodoro.model.wsmessage.{ClockSync, ControlMessage, State, UserRequest}
 import pomodoro.utils.implicits.Circe._
 
 import scala.util.{Failure, Success}
@@ -61,6 +61,7 @@ class WebSocketActor(userId: UUID,
               case Self(newState) =>
                 state = newState
                 replyToUser(State(newState))
+                replyToUser(ClockSync(System.currentTimeMillis().toDouble))
 
               case NoMessage =>
             }

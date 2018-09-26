@@ -17,7 +17,6 @@ class PomodoroUI(settings: Settings,
                  pStats: PomodoroStatistics) {
 
   private var clockOffset: Double = 0
-  private def currentClientTime: Double = Date.now()
   private def syncTime(): Double = Date.now() + clockOffset
 
   wsClient.setMessageHandler { e: org.scalajs.dom.MessageEvent =>
@@ -26,8 +25,8 @@ class PomodoroUI(settings: Settings,
         println(s"""Failed to decode message: "${e.data.toString}" ::: $err""")
 
       case Right(ClockSync(serverTime)) =>
-        clockOffset = currentClientTime - serverTime
-        println(s"Offset set to: $clockOffset")
+        clockOffset = Date.now() - serverTime
+        println(s"Offset set to: $clockOffset ms")
 
       case Right(State(ps)) =>
         println(s"Message: $ps")

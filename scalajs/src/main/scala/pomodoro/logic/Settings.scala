@@ -5,7 +5,6 @@ import com.thoughtworks.binding.Binding.{BindingSeq, Var}
 import com.thoughtworks.binding.{Binding, dom}
 import io.circe.generic.auto._
 import org.scalajs.dom.raw._
-import org.scalajs.dom.document
 import pomodoro.HttpClient
 import pomodoro.model.User
 
@@ -83,6 +82,7 @@ class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
       e.target match {
         case input: HTMLInputElement =>
           fn
+          disabledSave.value = userVar.toUser(user) == user
       }
     }
 
@@ -118,7 +118,10 @@ class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
 
     <div class="input-group">
       <div class="input-group-prepend">
-        <span class="input-group-text bg-secondary text-light">Starting break</span>
+        <span
+          class="input-group-text bg-secondary text-light"
+          title="When the pomodoro timer is up, start break automatically or keep going until the pomodoro is manually stopped"
+        >Starting break</span>
       </div>
       <div class="btn-group btn-group-toggle" data:data-toggle="buttons">
         <label class={"btn btn-light " + toggleAutoStart._1.bind} id="autoOpt"

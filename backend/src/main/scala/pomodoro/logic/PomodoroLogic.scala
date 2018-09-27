@@ -16,10 +16,10 @@ class PomodoroLogic(pomodoroRepo: PomodoroRepo)(implicit ec: ExecutionContext) {
 
   def stateChanges(userId: UUID,
                    message: UserRequest,
-                   state: PomodoroState): MessageType =
-    (message, state) match {
+                   currentState: PomodoroState): MessageType =
+    (message, currentState) match {
       case (RequestInit, _) =>
-        Self(state)
+        Self(currentState)
 
       case (StartPomodoro, Idle) =>
         startPomodoro(userId)

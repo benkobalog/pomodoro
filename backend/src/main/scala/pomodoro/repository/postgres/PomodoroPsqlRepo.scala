@@ -18,7 +18,7 @@ class PomodoroPsqlRepo(db: DatabaseDef)(implicit ec: ExecutionContext)
                      kind: String,
                      started: Double): Future[Int] = {
     val insertQ = RunningPomodoros.map(x => (x.usersId, x.kind, x.started)) += (usersId, kind, started)
-    db.run(insertQ).recover { case t => println("MMMMMMMMMM " + t.toString); 0 }
+    db.run(insertQ)
   }
 
   override def finish(userId: UUID): Future[Int] = {
@@ -42,12 +42,9 @@ class PomodoroPsqlRepo(db: DatabaseDef)(implicit ec: ExecutionContext)
     db.run(
       RunningPomodoros.filter(_.usersId === userId).result.headOption.map {
         case Some(pomodoro) =>
-          println(s"========= $pomodoro ]]]]]]")
           if (pomodoro.kind == "pomodoro") Running(pomodoro.started)
           else Break(pomodoro.kind, pomodoro.started)
         case None =>
-          println("NONee????????????")
-
           Idle
       }
     )

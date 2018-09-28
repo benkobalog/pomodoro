@@ -16,8 +16,7 @@ class PomodoroUI(settings: Settings,
                  wsClient: WebSocketClient,
                  pStats: PomodoroStatistics) {
 
-  private var clockOffset: Double = 0
-  private def syncTime(): Double = Date.now() + clockOffset
+  val time = new SyncTime()
 
   wsClient.setMessageHandler { e: org.scalajs.dom.MessageEvent =>
     decode[ControlMessage](e.data.toString) match {
@@ -25,8 +24,8 @@ class PomodoroUI(settings: Settings,
         println(s"""Failed to decode message: "${e.data.toString}" ::: $err""")
 
       case Right(ClockSync(serverTime)) =>
-        clockOffset = Date.now() - serverTime
-        println(s"Offset set to: $clockOffset ms")
+        time.setTime(serverTime)
+        println(s"Offset set to: ${time.getOffsetMillis} ms")
 
       case Right(State(ps)) =>
         println(s"Message: $ps")
@@ -34,9 +33,9 @@ class PomodoroUI(settings: Settings,
     }
   }
 
-  val sound = document.getElementById("audio").asInstanceOf[HTMLAudioElement]
-
   private val buttonStates = new ButtonStates(wsClient)
+
+  val sound = document.getElementById("audio").asInstanceOf[HTMLAudioElement]
 
   private val timeResolution = 1
   private var timer: Option[SetIntervalHandle] = None
@@ -108,7 +107,7 @@ class PomodoroUI(settings: Settings,
       case Break(kind, started) =>
         settings.setSaveButtonEvent(None)
         val secondsLeft =
-          (settings.getUser.breakSeconds - (syncTime - started) / 1000).toInt
+          (settings.getUser.breakSeconds - (time.getMillis - started) / 1000).toInt
         timerSeconds.value = secondsLeft
         createDownTimer(secondsLeft)
         startButtonProps.value = buttonStates.break.left
@@ -117,14 +116,14 @@ class PomodoroUI(settings: Settings,
       case Running(started) =>
         settings.setSaveButtonEvent(None)
         val secondsLeft =
-          (settings.getUser.pomodoroSeconds - (syncTime - started) / 1000).toInt
+          (settings.getUser.pomodoroSeconds - (time.getMillis - started) / 1000).toInt
         timerSeconds.value = secondsLeft
         createDownTimer(secondsLeft)
         startButtonProps.value = buttonStates.running.left
         stopButtonProps.value = buttonStates.running.right
 
       case RunningOvertime(started) =>
-        settings.setSaveButtonEvent(doNothing)
+        settings.setSaveButtonEvent(None)
         startButtonProps.value = buttonStates.runningOvertime.left
         stopButtonProps.value = buttonStates.runningOvertime.right
 

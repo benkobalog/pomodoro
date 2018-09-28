@@ -10,6 +10,6 @@ class SyncTime(startingOffsetMillis: Double = 0.0) {
 
   def getOffsetMillis: Double = clockOffsetMillis
 
-  def setTime(serverTimeMillis: Double): Unit =
+  def synchroniseTime(serverTimeMillis: Double): Unit =
     clockOffsetMillis = Date.now() - serverTimeMillis
 }

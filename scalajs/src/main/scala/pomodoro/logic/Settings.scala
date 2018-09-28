@@ -36,7 +36,7 @@ class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
 
   val userVar = UserVar(Var(""), Var(""), Var(true))
 
-  val toggleAutoStart = (Var("active"), Var(""))
+  private val toggleAutoStart = (Var("active"), Var(""))
 
   private def fetchUserFromDB(): Future[User] =
     httpClient

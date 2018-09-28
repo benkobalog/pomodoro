@@ -24,7 +24,7 @@ class PomodoroUI(settings: Settings,
         println(s"""Failed to decode message: "${e.data.toString}" ::: $err""")
 
       case Right(ClockSync(serverTime)) =>
-        time.setTime(serverTime)
+        time.synchroniseTime(serverTime)
         println(s"Offset set to: ${time.getOffsetMillis} ms")
 
       case Right(State(ps)) =>

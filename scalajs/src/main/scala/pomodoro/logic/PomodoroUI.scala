@@ -4,7 +4,7 @@ import com.thoughtworks.binding.Binding.{BindingSeq, Var}
 import com.thoughtworks.binding.{Binding, dom}
 import io.circe.generic.auto._
 import io.circe.parser.decode
-import org.scalajs.dom.{Event, document}
+import org.scalajs.dom.document
 import org.scalajs.dom.raw.{HTMLAudioElement, Node}
 import pomodoro.model._
 import pomodoro.model.wsmessage._
@@ -36,47 +36,15 @@ class PomodoroUI(settings: Settings,
 
   val sound = document.getElementById("audio").asInstanceOf[HTMLAudioElement]
 
-  case class ButtonProps(disabled: String,
-                         text: String,
-                         color: String,
-                         onClick: Event => Unit)
-
-  case class Controls(left: ButtonProps, right: ButtonProps)
-
-  private val idleButtons = Controls(
-    ButtonProps("",
-                "Start Pomodoro",
-                "btn-outline-success",
-                _ => wsClient.sendMessage(StartPomodoro)),
-    ButtonProps("d-none", "Stop", "btn-outline-danger", _ => ())
-  )
-
-  private val runningButtons = Controls(
-    ButtonProps("",
-                "Start Break",
-                "btn-outline-warning",
-                _ => wsClient.sendMessage(StartBreak("break"))),
-    ButtonProps("",
-                "Stop Pomodoro",
-                "btn-outline-danger",
-                _ => wsClient.sendMessage(EndPomodoro))
-  )
-
-  private val breakButtons = Controls(
-    ButtonProps("",
-                "Stop Break",
-                "btn-outline-warning",
-                _ => wsClient.sendMessage(EndBreak)),
-    ButtonProps("d-none", "Stop Pomodoro", "btn-outline-danger", _ => ())
-  )
+  private val buttonStates = new ButtonStates(wsClient)
 
   private val timeResolution = 1
   private var timer: Option[SetIntervalHandle] = None
   private val timerSeconds: Var[Int] = Var(settings.getUser.pomodoroSeconds)
-  private val stopButtonProps: Var[ButtonProps] = Var(idleButtons.left)
-  private val startButtonProps: Var[ButtonProps] = Var(idleButtons.right)
+  private val stopButtonProps: Var[ButtonProps] = Var(buttonStates.idle.left)
+  private val startButtonProps: Var[ButtonProps] = Var(buttonStates.idle.right)
 
-  private def createTimer(seconds: Int): Unit = {
+  private def createDownTimer(seconds: Int): Unit = {
     timer.foreach(clearInterval)
 
     var elapsedSeconds = 0
@@ -84,8 +52,11 @@ class PomodoroUI(settings: Settings,
       timerSeconds.value -= timeResolution
       elapsedSeconds += timeResolution
       if (elapsedSeconds >= seconds) {
-        timer.foreach(clearInterval)
-        sound.play()
+        if (settings.getUser.autoStartBreak) {
+          timer.foreach(clearInterval)
+        }
+//        sound.play()
+        updateState(RunningOvertime(Date.now() - seconds * 1000))
       }
     })
   }
@@ -122,36 +93,41 @@ class PomodoroUI(settings: Settings,
     </div>
   }
 
-  private def doNothing(a: Any): Unit = ()
   private def updateTimerValue(seconds: Int): Unit =
     timerSeconds.value = seconds
 
   private def updateState(pomodoroState: PomodoroState): Unit = {
     pomodoroState match {
       case Idle =>
-        settings.setSaveButtonEvent(updateTimerValue)
+        settings.setSaveButtonEvent(Some(updateTimerValue))
         timer.foreach(clearInterval)
         timerSeconds.value = settings.getUser.pomodoroSeconds
-        startButtonProps.value = idleButtons.left
-        stopButtonProps.value = idleButtons.right
+        startButtonProps.value = buttonStates.idle.left
+        stopButtonProps.value = buttonStates.idle.right
 
       case Break(kind, started) =>
-        settings.setSaveButtonEvent(doNothing)
+        settings.setSaveButtonEvent(None)
         val secondsLeft =
           (settings.getUser.breakSeconds - (syncTime - started) / 1000).toInt
         timerSeconds.value = secondsLeft
-        createTimer(secondsLeft)
-        startButtonProps.value = breakButtons.left
-        stopButtonProps.value = breakButtons.right
+        createDownTimer(secondsLeft)
+        startButtonProps.value = buttonStates.break.left
+        stopButtonProps.value = buttonStates.break.right
 
       case Running(started) =>
-        settings.setSaveButtonEvent(doNothing)
+        settings.setSaveButtonEvent(None)
         val secondsLeft =
           (settings.getUser.pomodoroSeconds - (syncTime - started) / 1000).toInt
         timerSeconds.value = secondsLeft
-        createTimer(secondsLeft)
-        startButtonProps.value = runningButtons.left
-        stopButtonProps.value = runningButtons.right
+        createDownTimer(secondsLeft)
+        startButtonProps.value = buttonStates.running.left
+        stopButtonProps.value = buttonStates.running.right
+
+      case RunningOvertime(started) =>
+        settings.setSaveButtonEvent(doNothing)
+        startButtonProps.value = buttonStates.runningOvertime.left
+        stopButtonProps.value = buttonStates.runningOvertime.right
+
     }
     pStats.getStats
   }

@@ -16,7 +16,9 @@ class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
   private var user: User = null
   def getUser: User = user
 
-  case class UserVar(ps: Var[String], bs: Var[String], autoStartBreak: Var[Boolean]) {
+  case class UserVar(ps: Var[String],
+                     bs: Var[String],
+                     autoStartBreak: Var[Boolean]) {
     def toUser(user: User): User =
       user
         .copy(pomodoroSeconds = ps.value.toInt * 60)
@@ -27,8 +29,8 @@ class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
       ps.value = (user.pomodoroSeconds / 60).toString
       bs.value = (user.breakSeconds / 60).toString
       autoStartBreak.value = user.autoStartBreak
-      toggleAutoStart._1.value = if(user.autoStartBreak) "active" else ""
-      toggleAutoStart._2.value = if(user.autoStartBreak) "" else "active"
+      toggleAutoStart._1.value = if (user.autoStartBreak) "active" else ""
+      toggleAutoStart._2.value = if (user.autoStartBreak) "" else "active"
     }
   }
 
@@ -51,7 +53,11 @@ class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
 
   var saveButtonEvent: Int => Unit = _
 
-  def setSaveButtonEvent(fn: Int => Unit): Unit = saveButtonEvent = fn
+  def setSaveButtonEvent(fnOpt: Option[Int => Unit]): Unit =
+    fnOpt match {
+      case Some(fn) => saveButtonEvent = fn
+      case None     => saveButtonEvent = (_: Any) => ()
+    }
 
   @dom def renderSettings(): Binding[BindingSeq[Node]] = {
 

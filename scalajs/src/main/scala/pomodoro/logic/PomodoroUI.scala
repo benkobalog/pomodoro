@@ -16,7 +16,7 @@ class PomodoroUI(settings: Settings,
                  wsClient: WebSocketClient,
                  pStats: PomodoroStatistics) {
 
-  val time = new SyncTime()
+  private val time = new SyncTime()
 
   wsClient.setMessageHandler { e: org.scalajs.dom.MessageEvent =>
     decode[ControlMessage](e.data.toString) match {

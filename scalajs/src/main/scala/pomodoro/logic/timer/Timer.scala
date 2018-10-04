@@ -2,9 +2,7 @@ package pomodoro.logic.timer
 
 import com.thoughtworks.binding.Binding.Var
 import pomodoro.logic.{Mediator, Settings}
-import pomodoro.model.{Idle, PomodoroState, RunningOvertime}
 
-import scala.scalajs.js.Date
 import scala.scalajs.js.timers.{SetIntervalHandle, clearInterval, setInterval}
 
 class Timer(settings: Settings, mediator: Mediator) {
@@ -39,10 +37,4 @@ class Timer(settings: Settings, mediator: Mediator) {
   def clearTimer(): Unit = {
     timer.foreach(clearInterval)
   }
-
-
-  private def runningOverTime(seconds: Int) = {
-    RunningOvertime(Date.now() - seconds * 1000)
-  }
-
 }

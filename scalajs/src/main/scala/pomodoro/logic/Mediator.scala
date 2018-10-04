@@ -18,9 +18,6 @@ class Mediator(settings: Settings, pStats: PomodoroStatistics, td: TokenData) {
   }
 
   def onFinish(timerLengthSeconds: Int): Unit = {
-//    settings.getUser.autoStartBreak
-    // Set state if it's needed
-    // Start a new timer if needed
     currentState match {
       case Idle => println("This shouldn't happen")
 

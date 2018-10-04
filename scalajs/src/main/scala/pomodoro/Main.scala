@@ -4,7 +4,7 @@ import com.thoughtworks.binding.dom
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import org.scalajs.dom.document
-import pomodoro.logic.{PomodoroStatistics, PomodoroUI, Settings, WebSocketClient}
+import pomodoro.logic._
 import pomodoro.model.TokenData
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -43,11 +43,10 @@ object Main {
   @JSExport
   def renderTimer(): Unit = {
     settingsF.foreach { settings =>
-      val wsClient = new WebSocketClient(jwtData.data)
-      val ui = new PomodoroUI(settings, wsClient, pomodoroStats)
+      val uiMediator = new Mediator(settings, pomodoroStats, jwtData.data)
 
       println("Render Timer")
-      dom.render(document.getElementById("timer"), ui.timerHtml())
+      dom.render(document.getElementById("timer"), uiMediator.timerHtml())
     }
   }
 

@@ -2,63 +2,37 @@ package pomodoro.logic
 
 import com.thoughtworks.binding.Binding.{BindingSeq, Var}
 import com.thoughtworks.binding.{Binding, dom}
-import io.circe.generic.auto._
-import io.circe.parser.decode
-import org.scalajs.dom.document
-import org.scalajs.dom.raw.{HTMLAudioElement, Node}
+import org.scalajs.dom.raw.Node
 import pomodoro.model._
 import pomodoro.model.wsmessage._
 
-import scala.scalajs.js.Date
-import scala.scalajs.js.timers.{SetIntervalHandle, clearInterval, setInterval}
+import scala.scalajs.js.timers.clearInterval
 
 class PomodoroUI(settings: Settings,
-                 wsClient: WebSocketClient,
-                 pStats: PomodoroStatistics) {
+                 buttonStates: ButtonStates,
+                 mediator: Mediator) {
 
+  private val timerSeconds: Var[Int] = mediator.timer.getTimerVar
   private val time = new SyncTime()
 
-  wsClient.setMessageHandler { e: org.scalajs.dom.MessageEvent =>
-    decode[ControlMessage](e.data.toString) match {
-      case Left(err) =>
-        println(s"""Failed to decode message: "${e.data.toString}" ::: $err""")
+  var currentState: PomodoroState = Idle
 
-      case Right(ClockSync(serverTime)) =>
+  def controlMessageHandler(controlMessage: ControlMessage): Unit =
+    controlMessage match {
+      case ClockSync(serverTime) =>
         time.synchroniseTime(serverTime)
         println(s"Offset set to: ${time.getOffsetMillis} ms")
 
-      case Right(State(ps)) =>
+      case State(ps) =>
         println(s"Message: $ps")
+        currentState = ps
         updateState(ps)
     }
-  }
 
-  private val buttonStates = new ButtonStates(wsClient)
+//  val sound = document.getElementById("audio").asInstanceOf[HTMLAudioElement]
 
-  val sound = document.getElementById("audio").asInstanceOf[HTMLAudioElement]
-
-  private val timeResolution = 1
-  private var timer: Option[SetIntervalHandle] = None
-  private val timerSeconds: Var[Int] = Var(settings.getUser.pomodoroSeconds)
   private val stopButtonProps: Var[ButtonProps] = Var(buttonStates.idle.left)
   private val startButtonProps: Var[ButtonProps] = Var(buttonStates.idle.right)
-
-  private def createDownTimer(seconds: Int): Unit = {
-    timer.foreach(clearInterval)
-
-    var elapsedSeconds = 0
-    timer = Some(setInterval(timeResolution * 1000) {
-      timerSeconds.value -= timeResolution
-      elapsedSeconds += timeResolution
-      if (elapsedSeconds >= seconds) {
-        if (settings.getUser.autoStartBreak) {
-          timer.foreach(clearInterval)
-        }
-//        sound.play()
-        updateState(RunningOvertime(Date.now() - seconds * 1000))
-      }
-    })
-  }
 
   @dom def timerHtml(): Binding[BindingSeq[Node]] = {
     <div class="row">
@@ -95,11 +69,11 @@ class PomodoroUI(settings: Settings,
   private def updateTimerValue(seconds: Int): Unit =
     timerSeconds.value = seconds
 
-  private def updateState(pomodoroState: PomodoroState): Unit = {
+  private def updateState(pomodoroState: PomodoroState): Unit =
     pomodoroState match {
       case Idle =>
         settings.setSaveButtonEvent(Some(updateTimerValue))
-        timer.foreach(clearInterval)
+        mediator.clearTimer()
         timerSeconds.value = settings.getUser.pomodoroSeconds
         startButtonProps.value = buttonStates.idle.left
         stopButtonProps.value = buttonStates.idle.right
@@ -109,7 +83,7 @@ class PomodoroUI(settings: Settings,
         val secondsLeft =
           (settings.getUser.breakSeconds - (time.getMillis - started) / 1000).toInt
         timerSeconds.value = secondsLeft
-        createDownTimer(secondsLeft)
+        mediator.createTimer(secondsLeft)
         startButtonProps.value = buttonStates.break.left
         stopButtonProps.value = buttonStates.break.right
 
@@ -118,7 +92,7 @@ class PomodoroUI(settings: Settings,
         val secondsLeft =
           (settings.getUser.pomodoroSeconds - (time.getMillis - started) / 1000).toInt
         timerSeconds.value = secondsLeft
-        createDownTimer(secondsLeft)
+        mediator.createTimer(secondsLeft)
         startButtonProps.value = buttonStates.running.left
         stopButtonProps.value = buttonStates.running.right
 
@@ -128,11 +102,9 @@ class PomodoroUI(settings: Settings,
         stopButtonProps.value = buttonStates.runningOvertime.right
 
     }
-    pStats.getStats
-  }
 
   private def showTime(seconds: Long): String = {
-    val (h, m, s) = secondsToTime(seconds)
-    f"${if (h == 0) "" else h + ":"}$m%02d:$s%02d"
+    var (sign, h, m, s) = secondsToTime(seconds)
+    f"$sign ${if (h == 0) "" else h + ":"}$m%02d:$s%02d"
   }
 }

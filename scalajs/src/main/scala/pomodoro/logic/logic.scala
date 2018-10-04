@@ -3,11 +3,12 @@ package pomodoro
 import org.scalajs.dom.Event
 
 package object logic {
-  def secondsToTime(seconds: Long): (Long, Long, Long) = {
-    val hours = seconds / 3600
-    val minutes = seconds % 3600 / 60
-    val seconds_ = seconds % 3600 % 60
-    (hours, minutes, seconds_)
+  def secondsToTime(seconds: Long): (String, Long, Long, Long) = {
+    val (sign, absSec)= if(seconds < 0) ("-", - seconds) else ("", seconds)
+    val hours = absSec / 3600
+    val minutes = absSec % 3600 / 60
+    val seconds_ = absSec % 3600 % 60
+    (sign, hours, minutes, seconds_)
   }
 
   case class ButtonProps(

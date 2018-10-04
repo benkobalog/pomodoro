@@ -61,14 +61,14 @@ class PomodoroStatistics(client: HttpClient) {
     def englishTime(value: Long, unit: String) =
       value + " " + (if (value == 1) unit else unit + "s") + " ago"
 
-    val (h, m, s) = secondsToTime((Date.now() - millis).toLong / 1000)
+    val (_, h, m, s) = secondsToTime((Date.now() - millis).toLong / 1000)
     if (h != 0) englishTime(h, "hour")
     else if (m != 0) englishTime(m, "minute")
     else englishTime(s, "second")
   }
 
   private def displayStats(pomodoroStats: PomodoroStats): String = {
-    val (h, m, s) =
+    val (_, h, m, s) =
       secondsToTime(
         (pomodoroStats.finished - pomodoroStats.started).toLong / 1000)
     f"${if (h == 0) "" else h + "h "}$m%02dm $s%02ds"

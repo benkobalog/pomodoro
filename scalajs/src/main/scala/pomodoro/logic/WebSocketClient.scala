@@ -4,9 +4,11 @@ import io.circe.generic.auto._
 import io.circe.syntax._
 import org.scalajs.dom
 import pomodoro.model.TokenData
-import pomodoro.model.wsmessage.{RequestInit, UserRequest}
+import pomodoro.model.wsmessage._
+import io.circe.generic.auto._
+import io.circe.parser.decode
 
-class WebSocketClient(td: TokenData) {
+class WebSocketClient(td: TokenData, mediator: Mediator) {
 
   private val ws =
     new dom.WebSocket(s"ws://${td.email}:${td.token}@localhost:9002/pomodoro")
@@ -16,8 +18,15 @@ class WebSocketClient(td: TokenData) {
     sendMessage(RequestInit)
   }
 
-  def setMessageHandler(fn: dom.MessageEvent => Unit): Unit =
-    ws.onmessage = fn
+  ws.onmessage = { e: org.scalajs.dom.MessageEvent =>
+    decode[ControlMessage](e.data.toString) match {
+      case Left(err) =>
+        println(s"""Failed to decode message: "${e.data.toString}" ::: $err""")
+
+      case Right(cm) =>
+        mediator.controlMessageHandler(cm)
+    }
+  }
 
   def sendMessage(userRequest: UserRequest): Unit = {
     ws.send(toJson(userRequest))

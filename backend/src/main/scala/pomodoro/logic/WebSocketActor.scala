@@ -58,7 +58,6 @@ class WebSocketActor(userId: UUID,
         logic
           .stateChanges(userId, msg, state) match {
           case BroadCast(newState) =>
-            state = newState
             eventBus.publish(EventBusMessage(userId, State(newState)))
 
           case Self(newState) =>

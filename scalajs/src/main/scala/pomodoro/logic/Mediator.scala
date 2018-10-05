@@ -30,10 +30,10 @@ class Mediator(settings: Settings, pStats: PomodoroStatistics, td: TokenData) {
 
       case Running(started) =>
         runAfterFinish {
-          if (settings.getUser.autoStartBreak) {
-            wsClient.sendMessage(StartBreak("break"))
-          } else {
+          if (settings.getUser.continuePomodoro) {
             controlMessageHandler(State(RunningOvertime(started)))
+          } else {
+            wsClient.sendMessage(StartBreak("break"))
           }
         }
 
@@ -42,11 +42,10 @@ class Mediator(settings: Settings, pStats: PomodoroStatistics, td: TokenData) {
 
       case Break(kind, started) =>
         runAfterFinish {
-          val stopBreakAutomatically = true
-          if (stopBreakAutomatically) {
-            wsClient.sendMessage(EndBreak)
-          } else {
+          if (settings.getUser.continueBreak) {
             controlMessageHandler(State(BreakOvertime(kind, started)))
+          } else {
+            wsClient.sendMessage(EndBreak)
           }
         }
 

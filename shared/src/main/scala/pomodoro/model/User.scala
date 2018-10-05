@@ -6,8 +6,6 @@ case class User(
     createdAt: Double,
     pomodoroSeconds: Int,
     breakSeconds: Int,
-    autoStartBreak: Boolean
-    // stopAtTimeLimit: Boolean,
-    // warnPeriodSeconds: Int,
-    // warnTimes: Int
+    continuePomodoro: Boolean,
+    continueBreak: Boolean
 )

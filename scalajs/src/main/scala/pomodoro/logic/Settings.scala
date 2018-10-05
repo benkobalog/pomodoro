@@ -23,14 +23,14 @@ class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
       user
         .copy(pomodoroSeconds = ps.value.toInt * 60)
         .copy(breakSeconds = bs.value.toInt * 60)
-        .copy(autoStartBreak = autoStartBreak.value)
+        .copy(continuePomodoro = autoStartBreak.value)
 
     def fromUser(user: User): Unit = {
       ps.value = (user.pomodoroSeconds / 60).toString
       bs.value = (user.breakSeconds / 60).toString
-      autoStartBreak.value = user.autoStartBreak
-      toggleAutoStart._1.value = if (user.autoStartBreak) "active" else ""
-      toggleAutoStart._2.value = if (user.autoStartBreak) "" else "active"
+      autoStartBreak.value = user.continuePomodoro
+      toggleAutoStart._1.value = if (user.continuePomodoro) "active" else ""
+      toggleAutoStart._2.value = if (user.continuePomodoro) "" else "active"
     }
   }
 

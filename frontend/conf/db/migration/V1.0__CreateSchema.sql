@@ -6,7 +6,8 @@ CREATE TABLE users (
   created_at DOUBLE PRECISION NOT NULL DEFAULT extract(epoch FROM current_timestamp),
   pomodoro_seconds INTEGER DEFAULT (25 * 60) NOT NULL,
   break_seconds INTEGER DEFAULT (5 * 60) NOT NULL,
-  auto_start_break BOOLEAN DEFAULT FALSE NOT NULL
+  continue_pomodoro BOOLEAN DEFAULT TRUE NOT NULL,
+  continue_break BOOLEAN DEFAULT FALSE NOT NULL
 );
 
 CREATE TABLE generated_password (

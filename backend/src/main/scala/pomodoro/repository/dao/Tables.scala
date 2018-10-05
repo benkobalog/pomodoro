@@ -61,19 +61,29 @@ trait Tables {
   class UserTemplate(_tableTag: Tag)
       extends profile.api.Table[User](_tableTag, "users") {
     def * =
-      (id, email, createdAt, pomodoroSeconds, breakSeconds, autoStartBreak) <> (User.tupled, User.unapply)
+      (id,
+       email,
+       createdAt,
+       pomodoroSeconds,
+       breakSeconds,
+       continue_pomodoro,
+       continue_break) <> (User.tupled, User.unapply)
+
     def ? =
       (Rep.Some(id),
        Rep.Some(email),
        Rep.Some(createdAt),
        Rep.Some(pomodoroSeconds),
        Rep.Some(breakSeconds),
-       Rep.Some(autoStartBreak)).shaped
+       Rep.Some(continue_pomodoro),
+       Rep.Some(continue_break)).shaped
         .<>(
           { r =>
             import r._
-            _1.map(_ =>
-              User.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get)))
+            _1.map(
+              _ =>
+                User.tupled(
+                  (_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get)))
           },
           (_: Any) =>
             throw new Exception("Inserting into ? projection not supported.")
@@ -84,7 +94,8 @@ trait Tables {
     val createdAt = column[Double]("created_at")
     val pomodoroSeconds = column[Int]("pomodoro_seconds")
     val breakSeconds = column[Int]("break_seconds")
-    val autoStartBreak = column[Boolean]("auto_start_break")
+    val continue_pomodoro = column[Boolean]("continue_pomodoro")
+    val continue_break = column[Boolean]("continue_break")
     val index1 = index("users_email_key", email, unique = true)
   }
   lazy val Users = new TableQuery(tag => new UserTemplate(tag))

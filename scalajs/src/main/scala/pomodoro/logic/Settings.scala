@@ -18,25 +18,31 @@ class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
 
   case class UserVar(ps: Var[String],
                      bs: Var[String],
-                     autoStartBreak: Var[Boolean]) {
+                     continuePomodoro: Var[Boolean],
+                     continueBreak: Var[Boolean]) {
     def toUser(user: User): User =
       user
         .copy(pomodoroSeconds = ps.value.toInt * 60)
         .copy(breakSeconds = bs.value.toInt * 60)
-        .copy(continuePomodoro = autoStartBreak.value)
+        .copy(continuePomodoro = continuePomodoro.value)
+        .copy(continueBreak = continueBreak.value)
 
     def fromUser(user: User): Unit = {
       ps.value = (user.pomodoroSeconds / 60).toString
       bs.value = (user.breakSeconds / 60).toString
-      autoStartBreak.value = user.continuePomodoro
-      toggleAutoStart._1.value = if (user.continuePomodoro) "active" else ""
-      toggleAutoStart._2.value = if (user.continuePomodoro) "" else "active"
+      continuePomodoro.value = user.continuePomodoro
+      togglePomodoroStop._1.value = if (user.continuePomodoro) "active" else ""
+      togglePomodoroStop._2.value = if (user.continuePomodoro) "" else "active"
+
+      toggleBreakStop._1.value = if (user.continueBreak) "active" else ""
+      toggleBreakStop._2.value = if (user.continueBreak) "" else "active"
     }
   }
 
-  val userVar = UserVar(Var(""), Var(""), Var(true))
+  val userVar = UserVar(Var(""), Var(""), Var(true), Var(false))
 
-  private val toggleAutoStart = (Var("active"), Var(""))
+  private val togglePomodoroStop = (Var("active"), Var(""))
+  private val toggleBreakStop = (Var(""), Var("active"))
 
   private def fetchUserFromDB(): Future[User] =
     httpClient
@@ -127,40 +133,36 @@ class Settings private (httpClient: HttpClient)(implicit ec: ExecutionContext) {
         <span
           class="input-group-text bg-secondary text-light"
           title="When the pomodoro timer is up, start break automatically or keep going until the pomodoro is manually stopped"
-        >Starting break</span>
+        >Starting Break</span>
       </div>
       <div class="btn-group btn-group-toggle" data:data-toggle="buttons">
-        <label class={"btn btn-light " + toggleAutoStart._1.bind} id="autoOpt"
-               onchange={onChangeRadio(userVar.autoStartBreak.value = true)(_)} >
-          <input type="radio" name="autoStartBreak" autocomplete="off" />Automatically</label>
+        <label class={"btn btn-light " + togglePomodoroStop._1.bind}
+               onchange={onChangeRadio(userVar.continuePomodoro.value = true)(_)} >
+          <input type="radio" name="continuePomodoro" autocomplete="off" />Manually</label>
 
-        <label class={"btn btn-light " + toggleAutoStart._2.bind} id="manualOpt"
-               onchange={onChangeRadio(userVar.autoStartBreak.value = false)(_)}>
-          <input type="radio" name="autoStartBreak" autocomplete="off" />Manually</label>
+        <label class={"btn btn-light " + togglePomodoroStop._2.bind}
+               onchange={onChangeRadio(userVar.continuePomodoro.value = false)(_)}>
+          <input type="radio" name="continuePomodoro" autocomplete="off" />Automatically</label>
       </div>
     </div>
 
     <div class="input-group">
       <div class="input-group-prepend">
-        <span class="input-group-text bg-secondary text-light">When time is up</span>
+        <span
+          class="input-group-text bg-secondary text-light"
+          title="When the break timer is up, stop break timer automatically or continue"
+        >Ending Break</span>
       </div>
 
-    <div class="btn-group btn-group-toggle" data:data-toggle="buttons">
-      <label class="btn btn-light">
-        <input type="radio" name="options" id="timeup-continue-option" autocomplete="off"/>Warn each
-      </label>
-    </div>
+      <div class="btn-group btn-group-toggle" data:data-toggle="buttons">
+        <label class={"btn btn-light " + toggleBreakStop._1.bind}
+               onchange={onChangeRadio(userVar.continueBreak.value = true)(_)} >
+          <input type="radio" name="continueBreak" autocomplete="off" />Manually</label>
 
-    <input type="text" class="form-control" id='timeup-continue-length'/>
-    <div class="input-group-prepend">
-      <span class="input-group-text">minutes</span>
-    </div>
-
-    <input type="text" class="form-control" id='timeup-continue-times'/>
-      <div class="input-group-prepend">
-        <span class="input-group-text">times</span>
+        <label class={"btn btn-light " + toggleBreakStop._2.bind}
+               onchange={onChangeRadio(userVar.continueBreak.value = false)(_)}>
+          <input type="radio" name="continueBreak" autocomplete="off" />Automatically</label>
       </div>
-
     </div>
 
     <div class="input-group">

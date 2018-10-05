@@ -3,6 +3,7 @@ package pomodoro.logic
 import com.thoughtworks.binding.Binding.{BindingSeq, Var}
 import com.thoughtworks.binding.{Binding, dom}
 import org.scalajs.dom.raw.Node
+import org.scalajs.dom.document
 import pomodoro.model._
 import pomodoro.model.wsmessage._
 
@@ -109,7 +110,10 @@ class PomodoroUI(settings: Settings,
     }
 
   private def showTime(seconds: Long): String = {
+
     var (sign, h, m, s) = secondsToTime(seconds)
-    f"$sign ${if (h == 0) "" else h + ":"}$m%02d:$s%02d"
+    val time = f"$sign ${if (h == 0) "" else h + ":"}$m%02d:$s%02d"
+    document.title = if (currentState != Idle) time else "Pomodoro"
+    time
   }
 }

@@ -3,8 +3,8 @@ package pomodoro.logic
 import com.thoughtworks.binding.Binding
 import org.scalajs.dom.raw.Node
 import pomodoro.logic.timer.Timer
-import pomodoro.model.wsmessage._
 import pomodoro.model._
+import pomodoro.model.wsmessage._
 
 class Mediator(settings: Settings, pStats: PomodoroStatistics, td: TokenData) {
   val wsClient = new WebSocketClient(td, this)

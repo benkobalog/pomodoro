@@ -31,7 +31,7 @@ class WebSocketStreamSpec
     pub.sendComplete()
   }
 
-  test("Two clients, one client starts a pomodoro, the other client stops it") {
+  test("Two clients, client #1 starts a pomodoro, client #2 stops it") {
     val userId = UUID.randomUUID()
 
     val flow1 = pomodoroEndpoints.webSocketHandler(userId)

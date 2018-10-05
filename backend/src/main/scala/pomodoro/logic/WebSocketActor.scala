@@ -45,6 +45,7 @@ class WebSocketActor(userId: UUID,
 
   private def handleEventBusMessage(s: State): Unit = {
     println("Got a message from the eventbus: " + s)
+    if (s.pomodoroState != state) state = s.pomodoroState
     replyToUser(s)
   }
 

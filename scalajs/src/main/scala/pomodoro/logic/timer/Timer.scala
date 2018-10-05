@@ -22,15 +22,9 @@ class Timer(settings: Settings, mediator: Mediator) {
       elapsedSeconds += timeResolution
     }
 
-    @inline def onZero(): Unit = {
-      if (elapsedSeconds >= timerLengthSeconds) {
-        mediator.onFinish(timerLengthSeconds)
-      }
-    }
-
     timer = Some(setInterval(timeResolution * 1000) {
       eachTime()
-      onZero()
+      mediator.onFinish(timerLengthSeconds, elapsedSeconds)
     })
   }
 

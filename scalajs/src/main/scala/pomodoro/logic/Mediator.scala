@@ -17,19 +17,28 @@ class Mediator(settings: Settings, pStats: PomodoroStatistics, td: TokenData) {
     ui.controlMessageHandler
   }
 
-  def onFinish(timerLengthSeconds: Int): Unit = {
+  def onFinish(timerLengthSeconds: Int, elapsedSeconds: Int): Unit = {
+    def runAfterFinish[A](f: => A) = {
+      if (elapsedSeconds >= timerLengthSeconds) {
+        f
+      }
+    }
+
     currentState match {
-      case Idle => println("This shouldn't happen")
+      case Idle =>
+        println("The State was Idle after a timer run. This shouldn't happen")
 
       case Running(started) =>
-        controlMessageHandler(State(RunningOvertime(started)))
+        runAfterFinish(
+          controlMessageHandler(State(RunningOvertime(started)))
+        )
 
       case RunningOvertime(started) =>
-        println("Overtime  OnFinish will be invoked every time at the moment")
 
       case Break(kind, started) =>
-        wsClient.sendMessage(EndBreak)
-        controlMessageHandler(State(Idle))
+        runAfterFinish {
+          wsClient.sendMessage(EndBreak)
+        }
     }
   }
 

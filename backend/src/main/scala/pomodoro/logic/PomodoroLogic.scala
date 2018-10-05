@@ -37,7 +37,8 @@ class PomodoroLogic(pomodoroRepo: PomodoroRepo)(implicit ec: ExecutionContext) {
         finishPomodoro(userId)
         BroadCast(Idle)
 
-      case _ => NoMessage
+      case _ =>
+        NoMessage
     }
 
   private def startPomodoro(userId: UUID) =

@@ -23,8 +23,8 @@ class Timer(settings: Settings, mediator: Mediator) {
     }
 
     timer = Some(setInterval(timeResolution * 1000) {
-      eachTime()
       mediator.onFinish(timerLengthSeconds, elapsedSeconds)
+      eachTime()
     })
   }
 

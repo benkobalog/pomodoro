@@ -3,7 +3,7 @@ package pomodoro.logic
 import com.thoughtworks.binding.Binding
 import org.scalajs.dom.raw.Node
 import pomodoro.logic.timer.Timer
-import pomodoro.model.wsmessage.{ControlMessage, EndBreak, State}
+import pomodoro.model.wsmessage._
 import pomodoro.model._
 
 class Mediator(settings: Settings, pStats: PomodoroStatistics, td: TokenData) {
@@ -29,16 +29,30 @@ class Mediator(settings: Settings, pStats: PomodoroStatistics, td: TokenData) {
         println("The State was Idle after a timer run. This shouldn't happen")
 
       case Running(started) =>
-        runAfterFinish(
-          controlMessageHandler(State(RunningOvertime(started)))
-        )
+        runAfterFinish {
+          if (settings.getUser.autoStartBreak) {
+            wsClient.sendMessage(StartBreak("break"))
+          } else {
+            controlMessageHandler(State(RunningOvertime(started)))
+          }
+        }
 
       case RunningOvertime(started) =>
+      // Do nothing here
 
       case Break(kind, started) =>
         runAfterFinish {
-          wsClient.sendMessage(EndBreak)
+          val stopBreakAutomatically = true
+          if (stopBreakAutomatically) {
+            wsClient.sendMessage(EndBreak)
+          } else {
+            controlMessageHandler(State(BreakOvertime(kind, started)))
+          }
         }
+
+      case BreakOvertime(kind, started) =>
+      // Do nothing here
+
     }
   }
 

@@ -101,6 +101,11 @@ class PomodoroUI(settings: Settings,
         startButtonProps.value = buttonStates.runningOvertime.left
         stopButtonProps.value = buttonStates.runningOvertime.right
 
+      case BreakOvertime(_, started) =>
+        settings.setSaveButtonEvent(None)
+        startButtonProps.value = buttonStates.breakOvertime.left
+        stopButtonProps.value = buttonStates.breakOvertime.right
+
     }
 
   private def showTime(seconds: Long): String = {

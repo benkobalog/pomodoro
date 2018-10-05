@@ -1,6 +1,6 @@
 package pomodoro.logic
 
-import pomodoro.model.wsmessage.{EndBreak, EndPomodoro, StartBreak, StartPomodoro}
+import pomodoro.model.wsmessage._
 
 private[logic] class ButtonStates(wsClient: WebSocketClient) {
 
@@ -38,6 +38,14 @@ private[logic] class ButtonStates(wsClient: WebSocketClient) {
     ButtonProps("",
                 "Stop Break",
                 "btn-outline-warning",
+                _ => wsClient.sendMessage(EndBreak)),
+    ButtonProps("d-none", "Stop Pomodoro", "btn-outline-danger", _ => ())
+  )
+
+  private[logic] val breakOvertime = Controls(
+    ButtonProps("",
+                "Stop Break",
+                "btn-outline-success",
                 _ => wsClient.sendMessage(EndBreak)),
     ButtonProps("d-none", "Stop Pomodoro", "btn-outline-danger", _ => ())
   )

@@ -112,7 +112,7 @@ class PomodoroUI(settings: Settings,
   private def showTime(seconds: Long): String = {
 
     var (sign, h, m, s) = secondsToTime(seconds)
-    val time = f"$sign ${if (h == 0) "" else h + ":"}$m%02d:$s%02d"
+    val time = f"$sign${if (h == 0) "" else h + ":"}$m%02d:$s%02d"
     document.title = if (currentState != Idle) time else "Pomodoro"
     time
   }

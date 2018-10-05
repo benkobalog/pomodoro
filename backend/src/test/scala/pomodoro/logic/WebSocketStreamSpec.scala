@@ -9,9 +9,11 @@ import akka.stream.testkit.{TestPublisher, TestSubscriber}
 import io.circe.generic.auto._
 import io.circe.syntax._
 import org.scalatest._
-import pomodoro.model.{Break, Idle, PomodoroState}
 import pomodoro.model.wsmessage._
+import pomodoro.model.{Break, Running}
 import pomodoro.utils.implicits.Circe._
+
+import scala.language.implicitConversions
 
 class WebSocketStreamSpec
     extends FunSuite
@@ -24,7 +26,7 @@ class WebSocketStreamSpec
 
     sub.request(1)
     pub.sendNext(StartPomodoro)
-    sub.expectNext(State(Idle))
+    sub.expectNext(State(Running(defaultTime)))
 
     pub.sendComplete()
   }
@@ -42,15 +44,15 @@ class WebSocketStreamSpec
     sub2.request(1)
 
     pub1.sendNext(StartPomodoro)
-    sub1.expectNext(State(Idle))
-    sub2.expectNext(State(Idle))
+    sub1.expectNext(State(Running(defaultTime)))
+    sub2.expectNext(State(Running(defaultTime)))
 
     sub1.request(1)
     sub2.request(1)
 
     pub2.sendNext(StartBreak("long break"))
-    sub1.expectNext(State(Idle))
-    sub2.expectNext(State(Idle))
+    sub1.expectNext(State(Break("long break", defaultTime)))
+    sub2.expectNext(State(Break("long break", defaultTime)))
 
     pub1.sendComplete()
     pub2.sendComplete()

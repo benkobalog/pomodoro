@@ -8,7 +8,9 @@ import pomodoro.repository.PomodoroRepo
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class PomodoroLogic(pomodoroRepo: PomodoroRepo)(implicit ec: ExecutionContext) {
+class PomodoroLogic(pomodoroRepo: PomodoroRepo,
+                    currentTime: => Double)(
+    implicit ec: ExecutionContext) {
 
   def getState(userId: UUID): Future[PomodoroState] = {
     pomodoroRepo.getState(userId)
@@ -51,9 +53,6 @@ class PomodoroLogic(pomodoroRepo: PomodoroRepo)(implicit ec: ExecutionContext) {
     pomodoroRepo
       .finish(userId)
       .flatMap(_ => pomodoroRepo.start(userId, kind, currentTime))
-
-  private def currentTime: Long =
-    System.currentTimeMillis()
 
   private implicit class SomeOps[A](a: A) {
     def some: Option[A] = Some(a)

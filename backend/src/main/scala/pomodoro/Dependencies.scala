@@ -31,6 +31,7 @@ trait Dependencies {
   lazy val pwRepo: PasswordRepo = wire[PasswordRepo]
 
   // Middleware
+  lazy val currentTime: Double = System.currentTimeMillis().toDouble
   lazy val pomodoroLogic: PomodoroLogic = wire[PomodoroLogic]
   lazy val authentication: Authentication = wire[Authentication]
 

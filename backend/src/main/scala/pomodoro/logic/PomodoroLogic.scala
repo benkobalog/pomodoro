@@ -9,7 +9,7 @@ import pomodoro.repository.PomodoroRepo
 import scala.concurrent.{ExecutionContext, Future}
 
 class PomodoroLogic(pomodoroRepo: PomodoroRepo,
-                    currentTime: => Double)(
+                    currentTime: () => Double)(
     implicit ec: ExecutionContext) {
 
   def getState(userId: UUID): Future[PomodoroState] = {
@@ -25,11 +25,11 @@ class PomodoroLogic(pomodoroRepo: PomodoroRepo,
 
       case (StartPomodoro, Idle) =>
         startPomodoro(userId)
-        BroadCast(Running(currentTime))
+        BroadCast(Running(currentTime()))
 
       case (StartBreak(kind), Running(started)) =>
         startBreak(userId, kind)
-        BroadCast(Break(kind, currentTime))
+        BroadCast(Break(kind, currentTime()))
 
       case (EndPomodoro, Running(started)) =>
         finishPomodoro(userId)
@@ -44,7 +44,7 @@ class PomodoroLogic(pomodoroRepo: PomodoroRepo,
     }
 
   private def startPomodoro(userId: UUID) =
-    pomodoroRepo.start(userId, "pomodoro", currentTime)
+    pomodoroRepo.start(userId, "pomodoro", currentTime())
 
   private def finishPomodoro(userId: UUID) =
     pomodoroRepo.finish(userId)
@@ -52,7 +52,7 @@ class PomodoroLogic(pomodoroRepo: PomodoroRepo,
   private def startBreak(userId: UUID, kind: String) =
     pomodoroRepo
       .finish(userId)
-      .flatMap(_ => pomodoroRepo.start(userId, kind, currentTime))
+      .flatMap(_ => pomodoroRepo.start(userId, kind, currentTime()))
 
   private implicit class SomeOps[A](a: A) {
     def some: Option[A] = Some(a)

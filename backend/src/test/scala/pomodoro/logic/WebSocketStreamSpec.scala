@@ -19,19 +19,19 @@ class WebSocketStreamSpec
     extends FunSuite
     with Matchers
     with WebSocketTestDeps {
-  test("One stream") {
+  test("Basic one client message") {
     val flow = pomodoroEndpoints.webSocketHandler(UUID.randomUUID())
 
     val (pub, sub) = probeFlow(flow)
 
     sub.request(1)
     pub.sendNext(StartPomodoro)
-    sub.expectNext(State(Running(defaultTime)))
+    sub.expectNext(State(Running(defaultTime())))
 
     pub.sendComplete()
   }
 
-  test("Two streams with the same userId") {
+  test("Two clients, one client starts a pomodoro, the other client stops it") {
     val userId = UUID.randomUUID()
 
     val flow1 = pomodoroEndpoints.webSocketHandler(userId)
@@ -44,15 +44,15 @@ class WebSocketStreamSpec
     sub2.request(1)
 
     pub1.sendNext(StartPomodoro)
-    sub1.expectNext(State(Running(defaultTime)))
-    sub2.expectNext(State(Running(defaultTime)))
+    sub1.expectNext(State(Running(defaultTime())))
+    sub2.expectNext(State(Running(defaultTime())))
 
     sub1.request(1)
     sub2.request(1)
 
     pub2.sendNext(StartBreak("long break"))
-    sub1.expectNext(State(Break("long break", defaultTime)))
-    sub2.expectNext(State(Break("long break", defaultTime)))
+    sub1.expectNext(State(Break("long break", defaultTime())))
+    sub2.expectNext(State(Break("long break", defaultTime())))
 
     pub1.sendComplete()
     pub2.sendComplete()
